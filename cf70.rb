@@ -958,6 +958,14 @@ get '/admin/share' do
   erb :share_record
 end
 
+get '/spiderweb' do
+  erb :spiderweb
+end
+
+get '/js/*.*' do |path, ext|
+  send_file 'js/' + path + '.' + ext
+end
+
 get '/img/*.*' do |path, ext|
   send_file 'img/' + path + '.' + ext
 end
