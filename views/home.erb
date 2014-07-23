@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>CF 2.0</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+
+    <style>
+    .btn-block{
+      margin-bottom: 10px;
+    }
+    .my-first-container [class^="col-"] {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          margin-bottom: 30px;
+          background-color: rgba(255,255,255,.0);
+          border: 1px dashed rgba(0,0,0,.4);
+
+          .my-inner {
+            padding: 5px;
+            background-color: rgba(255,255,255,.0);
+            border: 1px dashed rgba(0,0,0,.4);
+  }
+      }
+     .my-container [class^="col-"] {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          background-color: rgba(255,255,255,.0);
+          border: 1px dashed rgba(0,0,0,.4);
+
+          .my-inner {
+            padding: 5px;
+            background-color: rgba(255,255,255,.0);
+            border: 1px dashed rgba(0,0,0,.4);
+  }
+      }
+    #energy_bar {
+ display : inline-block;
+text-align:right;
+      color: #4CC552;
+      font-size: 12pt;
+    }
+    #time_left {
+       padding-left: 20pt;
+ display : inline-block;
+text-align:left;
+       color: gray;
+       font-size: 9pt;
+    }
+
+    .energy_font{
+      color: #4CC552;
+      font-size: 12pt;
+    }
+    .level_font{
+      color: #4169e1;
+      font-size: 12pt;
+    }
+    .coins_font{
+      color: #FFD700;
+      font-size: 20pt;
+      display : inline-block;
+    }
+    .message_font{  
+      color: red;
+    }
+    .inline_form{
+      display : inline-block;
+    }
+    .buffer{
+      padding-bottom:20pt;
+    }
+    .collapsesub{
+      font-size: 10pt;
+      color: gray;
+    }
+    .collapsetitle{
+      font-size: 12pt;
+
+    }
+    .panel-heading {background-color: #CCFFFF!important}
+
+    .progress{
+      margin-top: 4px;
+      max-height: 10px;
+    }
+    </style>
+
+    <script type="text/JavaScript">
+    //<![CDATA[
+    //global variables
+
+    priceOfUnlock = 5;
+    function UnlockBtn(btnParentId, btnId, index, coinId, author,tester){
+       this.btnParent = document.getElementById(btnParentId);
+       this.btn = document.getElementById(btnId);
+       this.coinLabel = document.getElementById(coinId);
+       this.recordIndex = index;
+       this.author = author;
+       this.tester = tester;
+       var obj = this;
+       this.btn.onclick = function(){obj.btnClicked();}    
+    }
+    UnlockBtn.prototype.btnClicked = function(){
+       var obj = this;
+       var coinsNum = parseInt(obj.coinLabel.innerHTML);
+       console.log(obj.coinLabel.innerHTML)
+       console.log(coinsNum)
+       if(coinsNum < priceOfUnlock){
+           window.alert("sorry, not enough coins...");
+           return;
+       }
+       obj.coinLabel.innerHTML = (coinsNum - priceOfUnlock).toString();
+       obj.btnParent.removeChild(obj.btn);
+       var authorTextNode = document.createTextNode(obj.author);
+       obj.btnParent.appendChild(authorTextNode);
+       //send request
+       var myXHR = new XMLHttpRequest();
+       //myXHR.open("GET", "/unlock");
+       myXHR.open("POST", "/unlock" + "?tester=" + obj.tester + "&unlockID=" + obj.recordIndex);
+       myXHR.onreadystatechange = function() {
+           if (this.readyState != 4) {
+              return;
+           }
+           if (this.status == 200) {
+              return;
+           } else {
+             console.log("error occurred!");
+           }
+       }
+       myXHR.send();
+    }
+    //]]>
+    </script>
+
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    
+
+    <!-- Marketing messaging and featurettes
+    ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div class="container marketing">
+
+  <div class="row">
+    <div class="col-xs-4 col-sm-2">  
+
+    </div>
+    <div class="col-xs-4 col-sm-3"><center><font size="5pt"><b>Home</b></font></center></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div class="col-xs-3 col-sm-3">
+          <form class="form-horizontal" role="form" action="rankings" method="post">
+              <button type="submit" class="btn btn-warning btn-sm">Rankings</button>
+          </form>
+    </div>
+  </div>
+
+  <!-- <h1>Records</h1> -->
+
+  <div class="row">
+    <div class="col-xs-4 col-sm-2">  <font class="level_font"> Level: <%=@@level[session[:tester]]%>   </font></div>
+    <div class="col-xs-4 col-sm-3"> 
+        <font size="4pt">   
+        <div class="progress">
+          <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
+           <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
+          </div>
+        </div> 
+        </font>
+    </div>
+    <div class="col-xs-1 col-sm-1">  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"></div>
+    <div class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2"> <font class="energy_font">Energy: </font><p id="energy_bar"><%= @@energy_left[session[:tester]] %></p> </div>
+    <div class="col-xs-4 col-sm-3" id="time_left"><%if @@energy_left[session[:tester]] == 5 %> Full Energy! <%end%></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="gemicon" class="col-xs-1 col-sm-1"><img src="/img/diamond.jpg" alt="Smiley face" width="22" height="22"></div>
+    <div id="gemnum" class="col-xs-1 col-sm-1"><%=@@gems[session[:tester]]%></div>
+  </div>
+
+  <div class="col-xs-16 col-sm-7">
+  <div class="panel-group" id="accordion">
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+
+          <div class="collapsetitle"><center>What do you think about your friends?</center></div>
+          <div class="collapsesub"><center>Earn  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> 100</center></div>
+          <div class="collapsesub"><center>Spend 1 energy to play!</center></div>
+
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse">
+      <div class="panel-body">
+        <form class="form-horizontal" role="form" action="choose_people" method="post">
+              <center><button id="play_btn" type="submit" class="btn btn-success btn-block">Play!</button></center>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+<div class="panel panel-danger">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+
+          <div class="collapsetitle"><center>See how others think about you!</center></div>
+          <div class="collapsesub"><center>Spend  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> to unlock an author</center></div>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+      <div class="panel-body">
+        <form class="form-horizontal" role="form" action="view_my_report" method="post">
+              <center><button type="submit" class="btn btn-danger btn-block">Go</button></center>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+
+          <div class="collapsetitle"><center>Guess what others think!</center></div>
+          <div class="collapsesub"><center>Earn up to <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> 50</center></div>
+
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse">
+      <div class="panel-body">
+
+        <%name_array = @@names.shuffle%>
+        <%name_array.each do |name|%>
+            <%next if name==session[:tester]%>
+            <%bundle_array = @@generated_bundles[name]%>
+            <%next if bundle_array==nil %>
+            <div class="row">
+              <center>Guess what <%=name%> thinks about... </center>
+            <%bundle_array.each do |bundle|%>
+              <%next if @@bundle_played[session[:tester]].include?(bundle[0])%>
+              <%quiz_array = bundle[1]%>
+              <%puts "quiz_array[0]"%>
+              <%puts quiz_array[0][:option0]%>
+              <form class="form-horizontal" role="form" action="play" method="post">
+                <center><button type="submit" class="btn btn-info btn-block" name="uuid" value="<%=bundle[0]%>" ><%=quiz_array[0]["option0"]%> vs <%=quiz_array[0]["option1"]%></button></center>
+              </form>
+            <%end%>
+            </div>
+        <%end%>
+
+
+        <!--
+        <div class="row">
+          <center>Guess what Albert thinks about... </center>
+          <form class="form-horizontal" role="form" action="play" method="post">
+              <center><button type="submit" class="btn btn-info btn-block">Angus vs Tiffany</button></center>
+          </form>
+          <form class="form-horizontal" role="form" action="play" method="post">
+              <center><button type="submit" class="btn btn-info btn-block">Angus vs Tiffany</button></center>
+          </form>
+        </div>
+        <div class="row">
+          <center>Guess what Albert thinks about... </center>
+          <form class="form-horizontal" role="form" action="choosepeople" method="post">
+              <center><button type="button" class="btn btn-info btn-block">Angus vs Tiffany</button></center>
+          </form>
+        </div>
+      -->
+
+    </div>
+  </div>
+</div>
+</div>
+
+<form id="nextform" role="form" action="refill" method="post">   
+           <input type="hidden" name="tester" value="<%=session[:tester]%>"> 
+</form>
+
+
+
+  <script type="text/javascript">
+  //<![CDATA[
+     gemicon = document.getElementById("gemicon");
+     gemele = document.getElementById("gemnum");
+     gemele.onclick = function(){ refill_energy(); }
+     gemicon.onclick = function(){ refill_energy(); }
+
+    function refill_energy() {
+       var gemele = document.getElementById("gemnum");
+       var gemnum = gemele.innerHTML;
+       if(gemnum == "0"){
+          alert("Not enough gems...");
+          return;
+       }
+       if(confirm("Do you want to spend 1 gem to refill energy?")){
+          var myform = document.forms["nextform"];
+          myform.submit();
+       }
+    }
+
+    energy = <%=@@energy_left[session[:tester]]%>
+    cycle = 480;
+    secs_left = Math.floor(cycle - <%=Time.now - @@last_time_modified[session[:tester]]%>);
+    console.log(secs_left)
+    if(secs_left < 0){
+       secs_left = 0;
+    }
+  
+    if(energy < 5){
+       setInterval(function(){update_energy("energy_bar","time_left","play_btn")},1000);
+       if(energy == 0){
+           var btn_container = document.getElementById("play_btn");
+           btn_container.disabled = true;
+           btn_container.innerHTML = "Gotta have energy to play...";
+       }
+       var time_container = document.getElementById("time_left");
+       time_container.innerHTML = get_min_sec(secs_left);
+    }
+    function update_energy(containerID,timeID,playbtnID){
+      if(energy < 5){
+        //console.log("here")
+        //console.log(energy)
+        //console.log(secs_left)
+        var container =  document.getElementById(containerID);
+        var time_container = document.getElementById(timeID);
+        var btn_container = document.getElementById(playbtnID);
+        //console.log(time_container)
+        //console.log(container)
+        if(secs_left == 0){
+           energy = energy + 1;
+           btn_container.disabled = false;
+           btn_container.innerHTML = "Play!";
+           container.innerHTML = energy;
+           secs_left = cycle;
+        } else{
+           secs_left = secs_left -1;
+        }
+        if(energy == 5){
+            time_container.innerHTML = "Full Energy!";
+        }else{
+            time_container.innerHTML = get_min_sec(secs_left);
+        }
+        if(energy == 0){
+           btn_container.disabled = true;
+           btn_container.innerHTML = "Gotta have energy to play...";
+        }
+      }
+    }  
+    function get_min_sec(secs){
+      var min = Math.floor(secs/60);
+      var sec = secs%60;
+      return ((min.toString()).concat(" : ")).concat(sec.toString());
+    }
+  //]]>
+  </script>
+   <% @@record.reverse_each do |record| %>
+    <% index = @@record.index(record)%>
+    <p class="buffer"></p>
+        <b><%if record[0] == session[:tester]%>
+              You
+           <%else%> 
+              <%if @@unlocked[session[:tester]] &&  @@unlocked[session[:tester]].include?(index.to_s) %>
+                 <%=record[0]%>
+              <% else%>
+                 <%divID = "authorDiv" + index.to_s%>
+                 <%btnID = "authorBtn" + index.to_s%>
+                 <div class="inline_form" id=<%=divID%>>
+                    <button id=<%=btnID%> >Unlock</button>
+                 </div>
+                 <script type="text/JavaScript">
+                 //<![CDATA[
+                    console.log("here")
+                    new UnlockBtn("<%=divID%>", "<%=btnID%>", "<%=index.to_s%>", "coinId", "<%=record[0]%>","<%=session[:tester]%>"); 
+                 //]]>
+                 </script>
+              <%end%>
+           <%end%></b> 
+        chose <b><%=record[2]%></b> over <b> 
+             <% if record[2] == record[3]%>
+                 <%=record[4]%>
+             <% else %>
+                 <%=record[3]%>
+             <% end %></b> in the question of <b><%=record[1]%></b>
+             
+             <b><font color="#4CC552" size=4> 
+             <%if @@record_asks[index]%>
+                 <%=@@record_asks[index]%> asked
+             <%end%>
+             </font></b>
+             <p></p>
+            <form class="inline_form" role="form" action="why" method="post">
+             <%if record[0] != session[:tester]%>
+              <form class="inline_form" role="form" action="why" method="post">
+ 	       <% if @@people_asks[session[:tester]] &&  @@people_asks[session[:tester]].include?(index.to_s) %>
+                      <button disabled="disabled">asked</button>
+               <% else%>
+                      <button type="submit" name="index" value=<%=index%> >ask why?</button>
+               <% end%>
+               </form>
+               <form class="inline_form" role="form" action="edit_comment" method="post">
+                   <button type="submit" name="index" value=<%=index%> >Comment!</button>
+               </form>
+             <%else%>
+               <form class="inline_form" role="form" action="why" method="post">
+                 <button type="submit" name="index" value=<%=index%> >Edit Reason</button>
+               </form>
+             <%end%>
+    
+      <%if @@record_comments[index]%>
+         <%@@record_comments[index].each do |comment|%>
+             <p>          <font color="orange">Reason:</font> <%=comment%> </p>
+         <%end%>
+      <%end%>
+      <%if @@others_comments[index]%>
+         <%@@others_comments[index].each do |comment|%>
+             <p>          <font color="blue"><%=comment[0]%>:</font> <%=comment[1]%> </p>
+         <%end%>
+      <%end%>
+   <% end %>
+      
+
+      <!-- FOOTER -->
+      <footer>
+        <p><a href="/home">refresh this page</a></p>
+<!--<p>If you are not <%=session[:tester]%>, please go back to <a href="/">home</a> and choose your name.</p> 
+-->    
+    <p>&copy; 2014 Orrzs Inc.</p>
+      </footer>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>    
+  </body>
+</html>

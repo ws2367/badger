@@ -1,0 +1,146 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="shortcut icon" href="img/favicon.png">
+
+    <title>CF 2.0</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+    <style>
+    .coins_font{
+      color: #FFA500;
+      font-size: 20pt;
+      display : inline-block;
+    }
+    .my-container{
+          padding-top: 10px;
+          padding-bottom: 10px;
+          background-color: rgba(255,255,255,.0);
+          border: 1px dashed rgba(0,0,0,.4);
+          max-width: 600px;
+          margin-left:0px;
+      }
+    </style>
+
+     <script type="text/JavaScript">
+    //<![CDATA[
+    //global variables
+
+    priceOfUnlock = 5;
+    function questionObj(option0btnid, option1btnid, formid){
+       this.option0btn = document.getElementById(option0btnid);
+       this.option1btn = document.getElementById(option1btnid);
+       this.myform = document.forms[formid];
+       var obj = this;
+       obj.option0btn.onclick = function(){obj.btnClicked(0);}
+       obj.option1btn.onclick = function(){obj.btnClicked(1);}
+    }
+    questionObj.prototype.btnClicked = function(option){
+       var obj = this;
+       obj.option0btn.disabled = true;
+       obj.option1btn.disabled = true;
+       if(option == 0){
+          obj.myform.answer.value = obj.option0btn.innerHTML;
+       } else {
+          obj.myform.answer.value = obj.option1btn.innerHTML;
+       }
+       obj.myform.submit();
+    }
+    //]]>
+    </script>
+
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    
+
+    <!-- Marketing messaging and featurettes
+    ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+</br>
+    <div class="container">
+
+      <div class="row">
+        <div class="col-xs-3 col-md-2"></div>
+        <div class="col-xs-2 col-md-1">
+          <%if session[:choose] == 1%>
+             <b><font size="5pt" color="#FFCC33" >1</font></b>
+          <%else%>
+             <font size="5pt" color="#A8A8A8" >1</font>
+          <%end%>
+        </div>
+        <div class="col-xs-2 col-md-1">
+          <%if session[:choose] == 2%>
+             <b><font size="5pt" color="#FFCC33" >2</font></b>
+          <%else%>
+             <font size="5pt" color="#A8A8A8" >2</font>
+          <%end%>
+        </div>        
+        <div class="col-xs-2 col-md-1">
+          <%if session[:choose] == 3%>
+             <b><font size="5pt" color="#FFCC33" >3</font></b>
+          <%else%>
+             <font size="5pt" color="#A8A8A8" >3</font>
+          <%end%>
+        </div>
+      </div>
+    </br>
+    </br></br>
+      </br>
+        <div class="container my-container">
+         <div class="row">
+             <div class="col-xs-12 col-sm-12"><center><font size="5pt" color="333399"><%=session[:question]%></font></div>
+         </div>
+          </br></br></br>
+         <div class="row">
+           <form id="nextform" role="form" action="choose_answer" method="post">   
+           <div class="col-xs-6 col-md-6">
+            <p><button type="submit" id="option0btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option0]%>"><%=session[:option0]%></button></p>
+           </div>
+           <div class="col-xs-6 col-md-6">
+              <p><button type="submit" id="option1btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option1]%>"><%=session[:option1]%></button></p>
+          </div>
+         </div><!-- /.row -->
+        <center><div id="toPutText" class="coins_font"></div>
+        </div>
+
+
+      <script type="text/JavaScript">
+                 //<![CDATA[
+                    //new questionObj("option0btn", "option1btn", "nextform"); 
+                 //]]>
+      </script>
+    </form>
+<br>
+
+  <br>
+      <!-- FOOTER -->
+      <footer>
+      </br></br></br></br></br></br></br></br>
+    <!--    <p>If you are not <%=session[:tester]%>, please go back to <a href="/">home</a> and choose your name.</p>-->
+        <p>&copy; 2014 Orrzs Inc.</p>
+      </footer>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>    
+  </body>
+</html>

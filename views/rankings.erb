@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>CF 2.0</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    
+
+    <!-- Marketing messaging and featurettes
+    ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div class="container marketing">
+  <!-- <h1>Records</h1> -->
+
+    <b><center><font size="5pt">Rankings</font></center></b>
+  </br>
+  </br>
+  <form class="form-horizontal" role="form" action="home" method="post">
+    <center><button type="submit" class="btn btn-warning btn-block">OK</button></center>
+  </form>
+
+  </br>
+  </br>
+<font size="3pt">
+
+  <%@@names.each do |name|%>
+
+    <div class="row">
+      <div class="col-xs-2 col-sm-2"></div>
+      <div class="col-xs-4 col-sm-4"><b><%=name%></b></div>
+      <div class="col-xs-6 col-sm-6">Level <b><%=@@level[name]%></b></div>
+    </div>
+    <div class="row">
+      <div class="col-xs-2 col-sm-2"></div>
+      <div class="col-xs-4 col-sm-4"></div>
+      <div class="col-xs-6 col-sm-6"><font color="#33CC66"><%=@@wins[name]%> wins</font><font color="#CC3366"> <%=@@losses[name]%> losses</font></div> 
+    </div>
+   </br>
+  <%end%>
+
+</font>
+
+</br></br>
+      <form class="form-horizontal" role="form" action="home" method="post">
+    <center><button type="submit" class="btn btn-warning btn-block">OK</button></center>
+  </form>
+
+      <!-- FOOTER -->
+      <footer>
+        </br></br></br></br></br></br></br></br></br>
+        <p>&copy; 2014 Orrzs Inc.</p>
+      </footer>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>    
+  </body>
+</html>

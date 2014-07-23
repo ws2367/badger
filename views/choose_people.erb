@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>CF 2.0</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    
+
+    <!-- Marketing messaging and featurettes
+    ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div class="container marketing">
+  <!-- <h1>Records</h1> -->
+</br>
+</br>
+
+
+    <b><center><font size="5pt">Comparing...</font></center></b>
+  </br>
+    <center><font size="5pt"><div id="option0"><%=@initial_first%></div></font></center>
+    <center><font size="3pt" color="gray">vs</font></center>
+    <center><font size="5pt"><div id="option1"><%=@initial_second%></div></font></center>
+  </br>
+    <center><button id="shufflebtn" type="button" class="btn btn-info"><span class="glyphicon glyphicon-random"></span> Shuffle</button></center>
+
+      </br></br></br></br></br></br></br>
+      <form id="people_form" class="form-horizontal" role="form" action="choose_answer" method="post">
+          <input type="hidden" name="option0" value=""> 
+          <input type="hidden" name="option1" value=""> 
+
+    <center><button type="submit" class="btn btn-success btn-block">Next <span class="glyphicon glyphicon-chevron-right"></span></button></center>
+  </form>
+      <script type="text/JavaScript">
+                 //<![CDATA[
+                    var myform = document.forms["people_form"];
+                    var option0ele = document.getElementById("option0");
+                    var option1ele = document.getElementById("option1");
+                    var shufflebtn = document.getElementById("shufflebtn");
+                    myform.option0.value = option0ele.innerHTML;
+                    myform.option1.value = option1ele.innerHTML;
+                    shufflebtn.onclick = function(){
+                        option0ele.innerHTML = "<%=@shuffle_first%>";
+                        option1ele.innerHTML = "<%=@shuffle_second%>";
+                        myform.option0.value = option0ele.innerHTML;
+                        myform.option1.value = option1ele.innerHTML;
+                        shufflebtn.style.visibility="hidden";
+                    }
+                 //]]>
+      </script>
+      <!-- FOOTER -->
+      <footer>
+        </br></br></br></br></br></br></br></br></br></br>
+        <p>&copy; 2014 Orrzs Inc.</p>
+      </footer>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>    
+  </body>
+</html>

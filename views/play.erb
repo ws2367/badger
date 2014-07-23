@@ -1,0 +1,233 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="shortcut icon" href="img/favicon.png">
+
+    <title>CF 2.0</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+    <style>
+    .coins_font{
+      color: #FFA500;
+      font-size: 20pt;
+      display : inline-block;
+    }
+    .my-container{
+          padding-top: 10px;
+          padding-bottom: 10px;
+          background-color: rgba(255,255,255,.0);
+          border: 1px dashed rgba(0,0,0,.4);
+          max-width: 600px;
+          margin-left:0px;
+      }
+      #buffer {
+          min-height: 30px;
+      }
+    </style>
+
+     <script type="text/JavaScript">
+    //<![CDATA[
+    //global variables
+
+    priceOfUnlock = 5;
+    function questionObj(option0btnid, option1btnid, answer,formid,toPutTextID,iconID){
+       this.option0btn = document.getElementById(option0btnid);
+       this.option1btn = document.getElementById(option1btnid);
+       this.nextform = document.forms[formid];
+       this.toPutText = document.getElementById(toPutTextID);
+       this.icon = document.getElementById(iconID);
+       this.answer = answer;
+       var obj = this;
+       obj.option0btn.onclick = function(){obj.btnClicked(0);}
+       obj.option1btn.onclick = function(){obj.btnClicked(1);}
+    }
+    questionObj.prototype.btnClicked = function(optionNum){
+       var obj = this;
+       obj.option0Name = obj.option0btn.innerHTML;
+       obj.option1Name = obj.option1btn.innerHTML;
+
+       if(optionNum == 0){
+          obj.chosenName = obj.option0Name;
+       }else{
+          obj.chosenName = obj.option1Name;
+       }
+       obj.option0btn.disabled = true;
+       obj.option1btn.disabled = true;
+
+       if(obj.chosenName == obj.answer){
+           var newicon = document.createElement('span');
+           newicon.className = "glyphicon glyphicon-ok";
+           newicon.style.color = "#00FF00";
+           newicon.style.fontSize="18pt";
+           obj.icon.appendChild(newicon);
+           obj.nextform.correct.value = "true";
+
+           var newtxt = document.createElement('span');
+           newtxt.style.color = "#FFA500";
+           newtxt.style.fontSize="15pt";
+           var txt = "Congratulations! You won!";
+           newtxt.appendChild(document.createTextNode(txt));
+           obj.toPutText.appendChild(newtxt);
+           if (optionNum == 0){
+              obj.option0btn.style.background='#FFA500';
+           }else{
+              obj.option1btn.style.background='#FFA500';
+           }
+       }else{
+           obj.nextform.correct.value = "false";
+           var newicon = document.createElement('span');
+           newicon.className = "glyphicon glyphicon-remove";
+           newicon.style.color = "#FF0000";
+           newicon.style.fontSize="18pt";
+           obj.icon.appendChild(newicon);
+
+           var newtxt = document.createElement('span');
+           newtxt.style.color = 'blue';
+           newtxt.style.fontSize="15pt";
+           var txt = "Oops.. you guessed wrong...";
+           newtxt.appendChild(document.createTextNode(txt));
+           obj.toPutText.appendChild(newtxt);
+           if (optionNum == 0){
+              obj.option0btn.style.background='blue';
+           }else{
+              obj.option1btn.style.background='blue';
+           }
+       }
+      
+       setTimeout(obj.submitForm,1000);
+
+    }
+    questionObj.prototype.submitForm = function(){
+       var obj = this;
+       obj.nextform.submit();
+    }
+    //]]>
+    </script>
+
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    
+
+    <!-- Marketing messaging and featurettes
+    ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+</br>
+    <div class="container">
+
+      <div class="row">
+        <div class="col-xs-3 col-md-2"></div>
+        <div class="col-xs-2 col-md-1">
+          <%if session[:round] == 1%>
+             <b><font size="5pt" color="#FFCC33" >1</font></b>
+          <%else%>
+             <font size="5pt" color="#A8A8A8" >1</font>
+          <%end%>
+        </div>
+        <div class="col-xs-2 col-md-1">
+          <%if session[:round] == 2%>
+             <b><font size="5pt" color="#FFCC33" >2</font></b>
+          <%else%>
+             <font size="5pt" color="#A8A8A8" >2</font>
+          <%end%>
+        </div>        
+        <div class="col-xs-2 col-md-1">
+          <%if session[:round] == 3%>
+             <b><font size="5pt" color="#FFCC33" >3</font></b>
+          <%else%>
+             <font size="5pt" color="#A8A8A8" >3</font>
+          <%end%>
+        </div>
+      </div>
+      <div class="row">
+        <div id="buffer" class="col-xs-3 col-md-2"></div>
+        <div id="icon1" class="col-xs-2 col-md-1">
+          <%if session[:correct_history].count > 0%>
+             <%if session[:correct_history][0] == "true"%>
+                <font color="#00FF00" size="5pt"><span class="glyphicon glyphicon-ok"></span></font>
+             <%else%>
+                <font color="#FF0000" size="5pt"><span class="glyphicon glyphicon-remove"></span></font>
+             <%end%>
+          <%end%>
+        </div>
+        <div id="icon2" class="col-xs-2 col-md-1">       
+          <%if session[:correct_history].count > 1%>
+             <%if session[:correct_history][1]  == "true"%>
+                <font color="#00FF00" size="5pt"><span class="glyphicon glyphicon-ok"></span></font>
+             <%else%>
+                <font color="#FF0000" size="5pt"><span class="glyphicon glyphicon-remove"></span></font>
+             <%end%>
+          <%end%>
+        </div>        
+        <div id="icon3" class="col-xs-2 col-md-1">          
+          <%if session[:correct_history].count > 2%>
+             <%if session[:correct_history][2]  == "true"%>
+                <font color="#00FF00" size="5pt"><span class="glyphicon glyphicon-ok"></span></font>
+             <%else%>
+                <font color="#FF0000" size="5pt"><span class="glyphicon glyphicon-remove"></span></font>
+             <%end%>
+          <%end%>
+        </div>
+      </div>
+    </br>
+      <p><font size="4pt" >Who do you think <b><%=session[:guesswhom]%></b> chose in this question?</font></p>
+      </br>
+        <div class="container my-container">
+         <div class="row">
+             <div class="col-xs-12 col-sm-12"><center><font size="4pt" color="0000CD"><%=@question%></font></div>
+         </div>
+          </br></br></br>
+         <div class="row">
+           <form id="nextform" role="form" action="play" method="post">   
+           <input type="hidden" name="correct" value="">   
+           <div class="col-xs-6 col-md-6">
+            <p><button id="option0btn" class="btn btn-info btn-lg btn-block" ><%=@option0%></button></p>
+           </div>
+           <div class="col-xs-6 col-md-6">
+              <p><button id="option1btn" class="btn btn-info btn-lg btn-block" ><%=@option1%></button></p>
+          </div>
+         </div><!-- /.row -->
+       </br>
+        <center><div id="toPutText"></div>
+        </div>
+
+
+      <script type="text/JavaScript">
+                 //<![CDATA[
+                    new questionObj("option0btn", "option1btn", "<%=@answer%>","nextform","toPutText","<%='icon' + session[:round].to_s%>"); 
+                 //]]>
+      </script>
+    </form>
+<br>
+
+  <br>
+      <!-- FOOTER -->
+      <footer>
+      </br></br></br></br></br></br></br></br>
+    <!--    <p>If you are not <%=session[:tester]%>, please go back to <a href="/">home</a> and choose your name.</p>-->
+        <p>&copy; 2014 Orrzs Inc.</p>
+      </footer>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>    
+  </body>
+</html>
