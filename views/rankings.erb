@@ -40,12 +40,12 @@
   </br>
 <font size="3pt">
 
-  <%@@names.each do |name|%>
+  <%@sortedLevelArray.reverse_each do |name,level|%>
 
     <div class="row">
       <div class="col-xs-2 col-sm-2"></div>
       <div class="col-xs-4 col-sm-4"><b><%=name%></b></div>
-      <div class="col-xs-6 col-sm-6">Level <b><%=@@level[name]%></b></div>
+      <div class="col-xs-6 col-sm-6">Level <b><%=level%></b></div>
     </div>
     <div class="row">
       <div class="col-xs-2 col-sm-2"></div>
