@@ -34,9 +34,19 @@ end
 def import_questions
   # @@questions = ["question 1", "question 2", "question 3", "question 4"]
   
+  # @@questions = Array.new
+  # CSV.foreach("questions.csv") do |row|
+  #   @@questions << row[0]
+  # end
+  
+  # question => {categ:xx, dim:xxx, attribute:xxx, value:xx}
+  @@categories = Hash.new
   @@questions = Array.new
+  
   CSV.foreach("questions.csv") do |row|
+    # question, value, categ, dim, attribute
     @@questions << row[0]
+    @@categories[row[0]] = {value:row[1].to_i, categ:row[2], dim:row[3], attribute:row[4]}
   end
 
   # @@questions.shuffle!
@@ -116,7 +126,7 @@ def initialize_independent_urls
   @@names.each do |name|
      id = (prng.rand(100000000)).to_s
      @@independent_ids[id] = name
-     puts name + ": http://107.170.232.66:7005/?id=" + id
+     puts name + ": http://0.0.0.0:7005/?id=" + id
   end
 end
 
@@ -958,7 +968,65 @@ get '/admin/share' do
   erb :share_record
 end
 
+
+def normalize_score scores
+  res = Hash.new
+  scores.each{|key, value| 
+    res[key] = Math.atan(value)/(Math::PI/2)
+  }
+  return res
+end
+
 get '/spiderweb' do
+  name = session[:tester]
+
+  # @@generated_bundles[name] = [
+  #                              [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+  #                             ]
+
+
+  # quiz = {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}
+  # bundle = [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]
+  # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+
+  @scores = Hash.new(0)
+  
+
+  # first flatten the parcels to an array of quizes only 
+  relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
+               select{|quiz| (quiz["option0"] == name) or (quiz["option1"] == name)}
+
+  
+  puts "rele"
+  puts relevants
+  relevants.each do |quiz|
+    value     = @@categories[quiz["question"]][:value]
+    category  = @@categories[quiz["question"]][:categ]
+    # dim       = @@categories[quiz[:question]][:dim]
+    # attribute = @@categories[quiz[:question]][:attribute]
+
+    another_option = (quiz["option1"] == name) ? quiz["option0"] : quiz["option1"]
+    if quiz["answer"] == name
+      @scores[category] += value
+    elsif quiz["answer"] == another_option
+      @scores[category] += value
+    end
+  end
+  
+  puts "score before"
+  puts @scores
+  @scores = normalize_score @scores
+  @contributors = collect_contributors(name)
+  @name = name
+  puts "score after"
+  puts @scores
+  
   erb :spiderweb
 end
 
