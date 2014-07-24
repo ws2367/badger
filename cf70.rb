@@ -507,6 +507,8 @@ route :get, :post, '/rankings' do
   if session[:xp_to_add]
     redirect to('/level_up'), 307
   end
+
+  @sortedLevelArray = @@level.sort_by {|key,value| value}
   clear_session
   erb :rankings
 end
