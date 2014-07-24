@@ -407,6 +407,12 @@ route :get, :post, '/view_my_report' do
      end
   end
   @my_questions.shuffle!
+  @oldR = 0.45
+  @oldP = 0.36
+  @oldS = 0.6
+  @newR = 0.32
+  @newP = 0.47
+  @newS = 0.3
   erb :my_report
 end
 

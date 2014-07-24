@@ -1,59 +1,32 @@
-var w = 500,
-  h = 500;
+var uagent = navigator.userAgent.toLowerCase();
 
-var colorscale = d3.scale.category10();
+var w, h;
+if( screen.width <= 480 ) {
+    //is iphone
+    w = 180;
+    h = 180;
+}else{
+    w = 600;
+    h = 600;
+}
+
+var colorscale = d3.scale.ordinal()
+    .domain(["foo", "bar", "baz"])
+    .range(["#66C4C1","#F57CD5","#333"]);
 
 //Legend titles
-var LegendOptions = ['Smartphone','Tablet'];
+var LegendOptions = ['8hrs ago','New'];
 
 //Data
 var d = [
       [
-      {axis:"Email",value:0.59},
-      {axis:"Social Networks",value:0.56},
-      {axis:"Internet Banking",value:0.42},
-      {axis:"News Sportsites",value:0.34},
-      {axis:"Search Engine",value:0.48},
-      {axis:"View Shopping sites",value:0.14},
-      {axis:"Paying Online",value:0.11},
-      {axis:"Buy Online",value:0.05},
-      {axis:"Stream Music",value:0.07},
-      {axis:"Online Gaming",value:0.12},
-      {axis:"Navigation",value:0.27},
-      {axis:"App connected to TV program",value:0.03},
-      {axis:"Offline Gaming",value:0.12},
-      {axis:"Photo Video",value:0.4},
-      {axis:"Reading",value:0.03},
-      {axis:"Listen Music",value:0.22},
-      {axis:"Watch TV",value:0.03},
-      {axis:"TV Movies Streaming",value:0.03},
-      {axis:"Listen Radio",value:0.07},
-      {axis:"Sending Money",value:0.18},
-      {axis:"Other",value:0.07},
-      {axis:"Use less Once week",value:0.08}
+      {axis:"Relationship",value:<%=@oldR%>},
+      {axis:"Professional",value:<%=@oldP%>},
+      {axis:"Social",value:<%=@oldS%>}
       ],[
-      {axis:"Email",value:0.48},
-      {axis:"Social Networks",value:0.41},
-      {axis:"Internet Banking",value:0.27},
-      {axis:"News Sportsites",value:0.28},
-      {axis:"Search Engine",value:0.46},
-      {axis:"View Shopping sites",value:0.29},
-      {axis:"Paying Online",value:0.11},
-      {axis:"Buy Online",value:0.14},
-      {axis:"Stream Music",value:0.05},
-      {axis:"Online Gaming",value:0.19},
-      {axis:"Navigation",value:0.14},
-      {axis:"App connected to TV program",value:0.06},
-      {axis:"Offline Gaming",value:0.24},
-      {axis:"Photo Video",value:0.17},
-      {axis:"Reading",value:0.15},
-      {axis:"Listen Music",value:0.12},
-      {axis:"Watch TV",value:0.1},
-      {axis:"TV Movies Streaming",value:0.14},
-      {axis:"Listen Radio",value:0.06},
-      {axis:"Sending Money",value:0.16},
-      {axis:"Other",value:0.07},
-      {axis:"Use less Once week",value:0.17}
+      {axis:"Relationship",value:0.48},
+      {axis:"Professional",value:0.41},
+      {axis:"Social",value:0.27}
       ]
     ];
 
@@ -88,7 +61,7 @@ var text = svg.append("text")
   .attr("y", 10)
   .attr("font-size", "12px")
   .attr("fill", "#404040")
-  .text("What % of owners use a specific service in a week");
+  .text("");
     
 //Initiate Legend 
 var legend = svg.append("g")
@@ -102,7 +75,7 @@ var legend = svg.append("g")
     .data(LegendOptions)
     .enter()
     .append("rect")
-    .attr("x", w - 65)
+    .attr("x", w - 45)
     .attr("y", function(d, i){ return i * 20;})
     .attr("width", 10)
     .attr("height", 10)
@@ -113,9 +86,9 @@ var legend = svg.append("g")
     .data(LegendOptions)
     .enter()
     .append("text")
-    .attr("x", w - 52)
+    .attr("x", w - 32)
     .attr("y", function(d, i){ return i * 20 + 9;})
-    .attr("font-size", "11px")
+    .attr("font-size", "18px")
     .attr("fill", "#737373")
     .text(function(d) { return d; })
     ; 
