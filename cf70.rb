@@ -8,10 +8,12 @@ require 'csv'
 require 'uuidtools'
 require 'twilio-ruby'
 
+IP = "0.0.0.0"
 PORT = 7005
 GAME_CYCLE = 600
 REFILL = 480
 ENERGY_CAPACITY = 5
+SPIDERWEB_THRESHOLD = 0.5
 
 set :bind, '0.0.0.0'
 set :port, PORT
@@ -77,6 +79,7 @@ end
 # assuming names and questions are set
 # format: [tester, question, chosen option, unchosen option]
 def initialize_record
+
   @@tester_progress = Array.new(@@names.count, -1)
   @@phone_number = Hash.new
   @@sharing_queue = Hash.new
@@ -115,6 +118,8 @@ def initialize_record
   @@unlock_someone = Hash.new
   @@logged_in = Hash.new
 
+  @@spiderweb_buffer = Hash.new
+
   @@record = Array.new 
   prng = Random.new(1234)
   @@score = Array.new(@@names.count){|i|Array.new(@@questions.count,prng.rand(2))}
@@ -126,7 +131,10 @@ def initialize_independent_urls
   @@names.each do |name|
      id = (prng.rand(100000000)).to_s
      @@independent_ids[id] = name
-     puts name + ": http://0.0.0.0:7005/?id=" + id
+  end
+
+  @@independent_ids.each do |id, name|
+    puts "%s->\n%s/?id=%s" % [name, URL, id]
   end
 end
 
@@ -152,15 +160,15 @@ end
 
 configure do
   puts "Configuring..."
+  URL = "http://%s:%s" % [IP, PORT.to_s]
+
   import_questions
   import_names
   initialize_record
   configure_Twilio
-  initialize_independent_urls
   initilize_variables
-
-  #@@url = "http://107.170.232.66"
-  URL = "http://107.170.232.66:" + PORT.to_s
+  initialize_independent_urls
+  
 end
 
 =begin
@@ -394,6 +402,32 @@ post '/refill' do
   redirect to('/home'), 307
 end
 
+
+def normalize_score scores
+  res = Hash.new
+  scores.each{|key, value| 
+    if key == "time"
+      res[key] = value
+    else
+      res[key] = Math.atan(value)/(Math::PI) + 0.5
+    end
+  }
+  return res
+end
+
+def sec_to_units seconds
+  mm, ss = seconds.divmod(60)
+  hh, mm = mm.divmod(60)
+  dd, hh = hh.divmod(24)
+  if dd > 0 
+    return "%d days, %d hours ago" % [dd, hh]
+  elsif hh > 0
+    return "%d hours, %d mins ago" % [hh, mm]  
+  else
+    return "%d mins ago" % [mm]  
+  end
+end
+
 route :get, :post, '/view_my_report' do
   @@view_report[session[:tester]] << Time.now
 
@@ -417,12 +451,90 @@ route :get, :post, '/view_my_report' do
      end
   end
   @my_questions.shuffle!
-  @oldR = 0.45
-  @oldP = 0.36
-  @oldS = 0.6
-  @newR = 0.32
-  @newP = 0.47
-  @newS = 0.3
+
+  #-------- Below is about calculating the spider web! --------#
+  # @@generated_bundles[name] = [
+  #                              [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+  #                             ]
+
+
+  # quiz = {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}
+  # bundle = [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]
+  # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+
+  @name = session[:tester]
+
+  if @@spiderweb_buffer[@name] == nil
+    @@spiderweb_buffer[@name] = Hash.new
+    @@spiderweb_buffer[@name][:old] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
+    @@spiderweb_buffer[@name][:new] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
+  end
+
+  @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now}
+
+  # first flatten the parcels to an array of quizes only 
+  relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
+               select{|quiz| (quiz["option0"] == @name) or (quiz["option1"] == @name)}
+  
+  relevants.each do |quiz|
+    value     = @@categories[quiz["question"]][:value]
+    category  = @@categories[quiz["question"]][:categ]
+    # dim       = @@categories[quiz[:question]][:dim]
+    # attribute = @@categories[quiz[:question]][:attribute]
+
+    another_option = (quiz["option1"] == @name) ? quiz["option0"] : quiz["option1"]
+    if quiz["answer"] == @name
+      @scores[category] += value
+    elsif quiz["answer"] == another_option
+      @scores[category] += value
+    end
+  end
+  
+  puts "score before"
+  puts @scores
+  @scores = normalize_score @scores
+  
+  puts "score after"
+  puts @scores
+
+  diff_w_old = (@scores["S"] - @@spiderweb_buffer[@name][:old]["S"]).abs + 
+               (@scores["P"] - @@spiderweb_buffer[@name][:old]["P"]).abs + 
+               (@scores["R"] - @@spiderweb_buffer[@name][:old]["R"]).abs
+
+  diff_w_new = (@scores["S"] - @@spiderweb_buffer[@name][:new]["S"]).abs + 
+               (@scores["P"] - @@spiderweb_buffer[@name][:new]["P"]).abs + 
+               (@scores["R"] - @@spiderweb_buffer[@name][:new]["R"]).abs
+
+  if diff_w_new > diff_w_old
+    @@spiderweb_buffer[@name][:old] = @@spiderweb_buffer[@name][:new]
+  end
+  @@spiderweb_buffer[@name][:new] = @scores
+
+  # @@spiderweb_buffer[@name][:old] = tmp if diff > SPIDERWEB_THRESHOLD
+  
+  puts "spiderweb "
+  puts @@spiderweb_buffer.inspect
+
+  puts "time old"
+  puts @@spiderweb_buffer[@name][:old]["time"]
+  puts "time new"
+  puts @@spiderweb_buffer[@name][:new]["time"]
+
+  @time_difference = sec_to_units(@@spiderweb_buffer[@name][:new]["time"] - @@spiderweb_buffer[@name][:old]["time"])
+  @oldR = @@spiderweb_buffer[@name][:old]["R"]
+  @oldP = @@spiderweb_buffer[@name][:old]["P"]
+  @oldS = @@spiderweb_buffer[@name][:old]["S"]
+  @newR = @@spiderweb_buffer[@name][:new]["R"]
+  @newP = @@spiderweb_buffer[@name][:new]["P"]
+  @newS = @@spiderweb_buffer[@name][:new]["S"]
+
+  @contributors = collect_contributors(@name)
   erb :my_report
 end
 
@@ -975,66 +1087,6 @@ get '/admin/share' do
 end
 
 
-def normalize_score scores
-  res = Hash.new
-  scores.each{|key, value| 
-    res[key] = Math.atan(value)/(Math::PI/2)
-  }
-  return res
-end
-
-get '/spiderweb' do
-  name = session[:tester]
-
-  # @@generated_bundles[name] = [
-  #                              [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
-  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
-  #                             ]
-
-
-  # quiz = {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}
-  # bundle = [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
-            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]
-  # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
-                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
-
-  @scores = Hash.new(0)
-  
-
-  # first flatten the parcels to an array of quizes only 
-  relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
-               select{|quiz| (quiz["option0"] == name) or (quiz["option1"] == name)}
-
-  
-  puts "rele"
-  puts relevants
-  relevants.each do |quiz|
-    value     = @@categories[quiz["question"]][:value]
-    category  = @@categories[quiz["question"]][:categ]
-    # dim       = @@categories[quiz[:question]][:dim]
-    # attribute = @@categories[quiz[:question]][:attribute]
-
-    another_option = (quiz["option1"] == name) ? quiz["option0"] : quiz["option1"]
-    if quiz["answer"] == name
-      @scores[category] += value
-    elsif quiz["answer"] == another_option
-      @scores[category] += value
-    end
-  end
-  
-  puts "score before"
-  puts @scores
-  @scores = normalize_score @scores
-  @contributors = collect_contributors(name)
-  @name = name
-  puts "score after"
-  puts @scores
-  
-  erb :spiderweb
-end
 
 get '/js/*.*' do |path, ext|
   send_file 'js/' + path + '.' + ext
