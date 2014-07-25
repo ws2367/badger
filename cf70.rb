@@ -108,7 +108,7 @@ def initialize_record
   @@progress = Hash.new
   @@gems = Hash.new
   @@unlocked_uuid_index = Hash.new
-  @@data_to_w_r = ["bundle_played", "logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "generated_bundles", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
+  @@data_to_w_r = ["categories", "spiderweb_buffer","bundle_played", "logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "generated_bundles", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
   @@wins = Hash.new
   @@losses = Hash.new
 
