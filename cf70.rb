@@ -142,7 +142,7 @@ def initialize_independent_urls
   File.open("private_links.txt", 'w') do |file|
     file.write "Private links:\n"
     @@independent_ids.each do |id, name|
-      file.write "%s -> %s/?id=%s" % [name, URL, id]
+      file.write "%s -> %s/?id=%s\n" % [name, URL, id]
     end
   end
 end
