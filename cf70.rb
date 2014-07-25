@@ -207,6 +207,7 @@ def clear_session
     session[:guesswhom] = nil
     session[:correct_history] = nil
     session[:xp_to_add] = nil
+    session[:skippedquestions] = nil
 end
 
 post '/home' do
@@ -312,6 +313,9 @@ post '/choose_answer' do
   if params[:option1]
     session[:option1] = params[:option1]
   end
+  if params[:question]
+    session[:question] = params[:question]
+  end
   prng = Random.new
   if params[:answer]
      quiz = Hash.new
@@ -347,6 +351,13 @@ def already_exists(question, current_array)
       return true
      end
   end
+  # if session[:skippedquestions]
+  #   session[:skippedquestions].each do |skippedquestion|
+  #     if question == skippedquestion
+  #       return true
+  #     end
+  #   end
+  # end
   return false
 end
 
@@ -823,6 +834,35 @@ post "/unlock" do
   end
   status 200
   body ''
+end
+
+post "/shuffle_people" do
+  @@unlock_someone[session[:tester]] << Time.now
+
+  @@coins[params[:tester]] = params[:coinsLeft].to_i
+  
+  status 200
+  body ''
+end
+
+post "/shuffle_question" do
+  puts "coinsleft"
+  puts params[:coinsLeft]
+  @@coins[session[:tester]] = params[:coinsLeft].to_i
+  if session[:skippedquestions]
+    session[:skippedquestions] << params[:oldq]
+  else
+    session[:skippedquestions] = Array.new
+    session[:skippedquestions] << params[:oldq]
+  end
+  prng = Random.new
+  loop do 
+      @question = @@questions[prng.rand(@@questions.count)]     
+      break if !already_exists(@question, session[:bundle])
+  end 
+  puts @question
+  status 200
+  body @question
 end
 
 
