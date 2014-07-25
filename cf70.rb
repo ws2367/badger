@@ -52,6 +52,7 @@ def import_questions
     @@categories[row[0]] = {value:row[1].to_i, categ:row[2]}
   end
 
+  @@questions.shuffle!
   # @@questions.shuffle!
   # CSV.open("suffled_questions.csv", "wb") do |csv|
   #   @@questions.each do |i|
