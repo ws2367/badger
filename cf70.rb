@@ -8,8 +8,8 @@ require 'csv'
 require 'uuidtools'
 require 'twilio-ruby'
 
-IP = "192.168.1.97"
-PORT = 7005
+IP = "107.170.232.66"
+PORT = 8002
 GAME_CYCLE = 600
 REFILL = 480
 ENERGY_CAPACITY = 5
