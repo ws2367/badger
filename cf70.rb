@@ -8,12 +8,13 @@ require 'csv'
 require 'uuidtools'
 require 'twilio-ruby'
 
-IP = "0.0.0.0"
+IP = "192.168.1.97"
 PORT = 7005
 GAME_CYCLE = 600
 REFILL = 480
 ENERGY_CAPACITY = 5
-SPIDERWEB_THRESHOLD = 0.5
+TIME_DIFFERENCE_UPPER_BOUND = 8 * 60 * 60 # secs
+TIME_DIFFERENCE_LOWER_BOUND = 5 * 60 # secs
 
 set :bind, '0.0.0.0'
 set :port, PORT
@@ -48,7 +49,7 @@ def import_questions
   CSV.foreach("questions.csv") do |row|
     # question, value, categ, dim, attribute
     @@questions << row[0]
-    @@categories[row[0]] = {value:row[1].to_i, categ:row[2], dim:row[3], attribute:row[4]}
+    @@categories[row[0]] = {value:row[1].to_i, categ:row[2]}
   end
 
   # @@questions.shuffle!
@@ -405,16 +406,17 @@ end
 
 def normalize_score scores
   res = Hash.new
+  multiplier = 0.0333333
   scores.each{|key, value| 
     if key == "time"
       res[key] = value
     else
-      res[key] = Math.atan(value)/(Math::PI) + 0.5
+      res[key] = Math.atan(multiplier * value.to_f)/(Math::PI) + 0.5
     end
   }
   return res
 end
-
+#  tan(0.25 * PI)/30 = m => m = 0.033
 def sec_to_units seconds
   mm, ss = seconds.divmod(60)
   hh, mm = mm.divmod(60)
@@ -461,9 +463,11 @@ route :get, :post, '/view_my_report' do
 
 
   # quiz = {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}
+  # 
   # bundle = [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
             # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
             # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]
+  # 
   # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
                   #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
                   #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
@@ -492,7 +496,7 @@ route :get, :post, '/view_my_report' do
     if quiz["answer"] == @name
       @scores[category] += value
     elsif quiz["answer"] == another_option
-      @scores[category] += value
+      @scores[category] -= value
     end
   end
   
@@ -503,21 +507,31 @@ route :get, :post, '/view_my_report' do
   puts "score after"
   puts @scores
 
-  diff_w_old = (@scores["S"] - @@spiderweb_buffer[@name][:old]["S"]).abs + 
-               (@scores["P"] - @@spiderweb_buffer[@name][:old]["P"]).abs + 
-               (@scores["R"] - @@spiderweb_buffer[@name][:old]["R"]).abs
+  time_diff_w_old = @scores["time"] - @@spiderweb_buffer[@name][:old]["time"]
+  time_diff_w_new = @scores["time"] - @@spiderweb_buffer[@name][:new]["time"]
 
-  diff_w_new = (@scores["S"] - @@spiderweb_buffer[@name][:new]["S"]).abs + 
-               (@scores["P"] - @@spiderweb_buffer[@name][:new]["P"]).abs + 
-               (@scores["R"] - @@spiderweb_buffer[@name][:new]["R"]).abs
-
-  if diff_w_new > diff_w_old
+  # First rule: Never too old
+  if time_diff_w_old > TIME_DIFFERENCE_UPPER_BOUND
     @@spiderweb_buffer[@name][:old] = @@spiderweb_buffer[@name][:new]
+  # Second rule: Never too new
+  elsif time_diff_w_new < TIME_DIFFERENCE_LOWER_BOUND
+
+  else
+    # Third rule: The one with larger difference stays
+    diff_w_old = (@scores["S"] - @@spiderweb_buffer[@name][:old]["S"]).abs + 
+                 (@scores["P"] - @@spiderweb_buffer[@name][:old]["P"]).abs + 
+                 (@scores["R"] - @@spiderweb_buffer[@name][:old]["R"]).abs
+
+    diff_w_new = (@scores["S"] - @@spiderweb_buffer[@name][:new]["S"]).abs + 
+                 (@scores["P"] - @@spiderweb_buffer[@name][:new]["P"]).abs + 
+                 (@scores["R"] - @@spiderweb_buffer[@name][:new]["R"]).abs
+
+    if diff_w_new > diff_w_old
+      @@spiderweb_buffer[@name][:old] = @@spiderweb_buffer[@name][:new]
+    end
   end
   @@spiderweb_buffer[@name][:new] = @scores
 
-  # @@spiderweb_buffer[@name][:old] = tmp if diff > SPIDERWEB_THRESHOLD
-  
   puts "spiderweb "
   puts @@spiderweb_buffer.inspect
 
