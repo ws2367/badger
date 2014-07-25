@@ -18,27 +18,40 @@ if (uagent.search("iphone") > -1){
     isIphone = false;
 }
 
+console.log(isIphone)
+
 var RadarChart = {
   draw: function(id, d, options){
   var cfg = {
+   //radius of the endpoints
    radius: 5,
-   w: (isIphone)? 180: 600,
-   h: (isIphone)? 180: 600,
+   //dunno what for yet
+   w: 30,//(isIphone)? 180: 600,
+   h: 30,//(isIphone)? 180: 600,
    factor: 1,
    factorLegend: .85,
    levels: 3,
    maxValue: 0,
+   //dont change
    radians: 2 * Math.PI,
    opacityArea: 0.5,
+   //dunno what for yet
    ToRight: 5,
-   TranslateX: 80,
+   //change the x offset of Radar Chart
+   TranslateX: 78,
    TranslateY: 30,
    ExtraWidthX: 0,
+   //to have a padding at bottom
    ExtraWidthY: 10,
+   svgWidth:320,
+   svgHeight:280,
    color: d3.scale.ordinal()
     .domain(["foo", "bar", "baz"])
     .range(["#66C4C1","#F57CD5","#333"])
   };
+
+  console.log(isIphone)
+
   
   if('undefined' !== typeof options){
     for(var i in options){
@@ -56,8 +69,8 @@ var RadarChart = {
   
   var g = d3.select(id)
       .append("svg")
-      .attr("width", cfg.w+cfg.ExtraWidthX)
-      .attr("height", cfg.h+cfg.ExtraWidthY)
+      .attr("width", cfg.svgWidth)
+      .attr("height", cfg.svgHeight)
       .append("g")
       .attr("transform", "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ")");
       ;

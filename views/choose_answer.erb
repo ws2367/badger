@@ -30,6 +30,27 @@
           max-width: 600px;
           margin-left:0px;
       }
+      #shufflebtn{
+        display : inline-block;
+      }
+      #questionid{
+        display : inline-block;
+      }
+    #timesleftbig{
+      display: inline-block;
+      padding-left: 5pt;
+    }
+    #shufflebtn{
+      display: inline-block;
+    }
+    #timesleft{
+      display: inline-block;
+      font-size: 18pt;
+      padding-left: 5pt;
+    }
+    #questionid{
+      padding-right: 10px;
+    }
     </style>
 
      <script type="text/JavaScript">
@@ -71,6 +92,33 @@
 </br>
     <div class="container">
 
+
+<div class="row">
+    <div class="col-xs-4 col-sm-2">  <font class="level_font"> Level: <%=@@level[session[:tester]]%>   </font></div>
+    <div class="col-xs-4 col-sm-3"> 
+        <font size="4pt">   
+        <div class="progress">
+          <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
+           <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
+          </div>
+        </div> 
+        </font>
+    </div>
+    <div class="col-xs-1 col-sm-1">  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"></div>
+    <div id="coinicon" class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2"> <font class="energy_font">Energy: </font><p id="energy_bar"><%= @@energy_left[session[:tester]] %></p> </div>
+    <div class="col-xs-4 col-sm-3" id="time_left"><%if @@energy_left[session[:tester]] == 5 %> Full Energy! <%end%></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="gemicon" class="col-xs-1 col-sm-1"><img src="/img/diamond.jpg" alt="Smiley face" width="22" height="22"></div>
+    <div id="gemnum" class="col-xs-1 col-sm-1"><%=@@gems[session[:tester]]%></div>
+  </div>
+
+
+
+
+
       <div class="row">
         <div class="col-xs-3 col-md-2"></div>
         <div class="col-xs-2 col-md-1">
@@ -100,11 +148,12 @@
       </br>
         <div class="container my-container">
          <div class="row">
-             <div class="col-xs-12 col-sm-12"><center><font size="5pt" color="333399"><%=session[:question]%></font></div>
+             <div class="col-xs-12 col-sm-12"><center><font size="5pt" color="333399"><div id="questionid"><%=session[:question]%></div><button class="btn btn-warning" id="shufflebtn"><span class="glyphicon glyphicon-random"></span>     <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22">30</button></font> <div id="timesleftbig"> <span class="glyphicon glyphicon-remove"><div id="timesleft">3</div></div></div>
          </div>
           </br></br></br>
          <div class="row">
            <form id="nextform" role="form" action="choose_answer" method="post">   
+            <input type="hidden" name="question" value="<%=session[:question]%>"> 
            <div class="col-xs-6 col-md-6">
             <p><button type="submit" id="option0btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option0]%>"><%=session[:option0]%></button></p>
            </div>
@@ -118,7 +167,50 @@
 
       <script type="text/JavaScript">
                  //<![CDATA[
-                    //new questionObj("option0btn", "option1btn", "nextform"); 
+                    var myform = document.forms["nextform"];
+                    var shufflebtn = document.getElementById("shufflebtn");
+                    var questionele = document.getElementById("questionid");
+                    var coinele =  document.getElementById("coinicon");
+
+                    var timesleftele = document.getElementById("timesleft");
+                    var costPerShuffle = 30;
+
+                    shufflebtn.onclick = function(){
+                        var coinsNum = parseInt(coinele.innerHTML);
+                        if(coinsNum < costPerShuffle){
+                          alert("sorry... not enough coins...");
+                          return;
+                        }
+
+                        coinsLeft = coinsNum - costPerShuffle;
+                        coinele.innerHTML = coinsLeft.toString();
+
+                        timesleft = parseInt(timesleftele.innerHTML);
+                        timesleft = timesleft - 1;
+                        if (timesleft == 0){
+                          timeleftbigele = document.getElementById("timesleftbig");
+                          timeleftbigele.parentNode.removeChild(timeleftbigele);
+                          shufflebtn.style.visibility = 'hidden';
+                        }else{
+                          timesleftele.innerHTML = timesleft.toString();
+                        }
+                        var myXHR = new XMLHttpRequest();
+                        myXHR.open("POST", "/shuffle_question" + "?oldq=" + questionele.innerHTML + "&coinsLeft=" + coinele.innerHTML);
+                        myXHR.onreadystatechange = function() {
+                             if (this.readyState != 4) {
+                                return;
+                             }
+                             if (this.status == 200) {
+                                questionele.innerHTML = this.responseText;
+                                myform.question.value = questionele.innerHTML;
+                                console.log(questionele.innerHTML);
+                                return;
+                             } else {
+                               console.log("error occurred!");
+                             }
+                         }
+                         myXHR.send();
+                    }
                  //]]>
       </script>
     </form>

@@ -85,10 +85,17 @@
 <!-- NAVBAR
 ================================================== -->
   <body>
-
+    <div class="container marketing">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12"><center><b><font size="4pt">My Report</font></b></center></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+      </div>
+ </div>
+</br>
     <div id="body">
     <div id="chart"></div>
     </div>
+ 
 
 
     <script type="text/JavaScript">
@@ -96,13 +103,18 @@
 var uagent = navigator.userAgent.toLowerCase();
 
 var w, h;
+var isIphone;
 if( screen.width <= 480 ) {
     //is iphone
     w = 180;
     h = 180;
+    isIphone = true;
 }else{
+    chartelement = document.getElementById("chart");
+    chartelement.style.paddingLeft = "250px";
     w = 600;
     h = 600;
+    isIphone = false;
 }
 
 var colorscale = d3.scale.ordinal()
@@ -131,7 +143,9 @@ var mycfg = {
   h: h,
   maxValue: 0.6,
   levels: 6,
-  ExtraWidthX: 300
+  ExtraWidthX: 300,
+  svgWidth:(isIphone)? 320: 700,
+  svgHeight:(isIphone)? 280: 600
 }
 
 //Call function to draw the Radar chart
@@ -146,7 +160,7 @@ var svg = d3.select('#body')
   .selectAll('svg')
   .append('svg')
   .attr("width", w+300)
-  .attr("height", h)
+  .attr("height", h+300)
 
 //Create the title for the legend
 var text = svg.append("text")
@@ -170,8 +184,9 @@ var legend = svg.append("g")
     .data(LegendOptions)
     .enter()
     .append("rect")
-    .attr("x", w - 45)
-    .attr("y", function(d, i){ return i * 20;})
+    //change x offset
+    .attr("x", w - 190)
+    .attr("y", function(d, i){ return i * 20 + 200;})
     .attr("width", 10)
     .attr("height", 10)
     .style("fill", function(d, i){ return colorscale(i);})
@@ -181,8 +196,9 @@ var legend = svg.append("g")
     .data(LegendOptions)
     .enter()
     .append("text")
-    .attr("x", w - 32)
-    .attr("y", function(d, i){ return i * 20 + 9;})
+    //change x offset
+    .attr("x", w - 177)
+    .attr("y", function(d, i){ return i * 20 + 209;})
     .attr("font-size", "18px")
     .attr("fill", "#737373")
     .text(function(d) { return d; })
@@ -195,10 +211,7 @@ var legend = svg.append("g")
     <!-- Wrap the rest of the page in another container to center all the content. -->
 
     <div class="container marketing">
-      <div class="row">
-        <div class="col-xs-12 col-sm-12"><center><b><font size="4pt">My Report</font></b></center></div>
-    <!-- Optional: clear the XS cols if their content doesn't match in height -->
-      </div>
+      
       <div class="row">
         <div class="col-xs-12 col-sm-12"><center><font color=#00BFFF size="3pt">Spend <img src="/img/coin.jpg" alt="Smiley face" width="16" height="16">300 to unlock an author</font></center></p></div>
     <!-- Optional: clear the XS cols if their content doesn't match in height -->

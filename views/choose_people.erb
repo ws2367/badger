@@ -15,6 +15,19 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <style type="text/css">
+    #timesleftbig{
+      display: inline-block;
+      padding-left: 5pt;
+    }
+    #shufflebtn, #timesleft{
+      display: inline-block;
+    }
+    #timesleft{
+      font-size: 18pt;
+      padding-left: 5pt;
+    }
+    </style>
 
   </head>
 <!-- NAVBAR
@@ -22,11 +35,36 @@
   <body>
     
 
+
     <!-- Marketing messaging and featurettes
     ================================================== -->
     <!-- Wrap the rest of the page in another container to center all the content. -->
 
     <div class="container marketing">
+
+  <!-- <h1>Records</h1> -->
+
+  <div class="row">
+    <div class="col-xs-4 col-sm-2">  <font class="level_font"> Level: <%=@@level[session[:tester]]%>   </font></div>
+    <div class="col-xs-4 col-sm-3"> 
+        <font size="4pt">   
+        <div class="progress">
+          <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
+           <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
+          </div>
+        </div> 
+        </font>
+    </div>
+    <div class="col-xs-1 col-sm-1">  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"></div>
+    <div id="coinicon" class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2"> <font class="energy_font">Energy: </font><p id="energy_bar"><%= @@energy_left[session[:tester]] %></p> </div>
+    <div class="col-xs-4 col-sm-3" id="time_left"><%if @@energy_left[session[:tester]] == 5 %> Full Energy! <%end%></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="gemicon" class="col-xs-1 col-sm-1"><img src="/img/diamond.jpg" alt="Smiley face" width="22" height="22"></div>
+    <div id="gemnum" class="col-xs-1 col-sm-1"><%=@@gems[session[:tester]]%></div>
+  </div>
   <!-- <h1>Records</h1> -->
 </br>
 </br>
@@ -38,8 +76,9 @@
     <center><font size="3pt" color="gray">vs</font></center>
     <center><font size="5pt"><div id="option1"><%=@initial_second%></div></font></center>
   </br>
-    <center><button id="shufflebtn" type="button" class="btn btn-info"><span class="glyphicon glyphicon-random"></span> Shuffle</button></center>
-
+    <center><button id="shufflebtn" type="button" class="btn btn-warning"><span class="glyphicon glyphicon-random"></span>      <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22">30</button>    <div id="timesleftbig"> <span class="glyphicon glyphicon-remove"><div id="timesleft">3</div></div>
+    </center>
+    
       </br></br></br></br></br></br></br>
       <form id="people_form" class="form-horizontal" role="form" action="choose_answer" method="post">
           <input type="hidden" name="option0" value=""> 
@@ -53,14 +92,57 @@
                     var option0ele = document.getElementById("option0");
                     var option1ele = document.getElementById("option1");
                     var shufflebtn = document.getElementById("shufflebtn");
+                    var coinele =  document.getElementById("coinicon");
+                    var timesleftele = document.getElementById("timesleft");
                     myform.option0.value = option0ele.innerHTML;
                     myform.option1.value = option1ele.innerHTML;
+                    var player = "<%=session[:tester]%>";
+                    var myNames = [<%= @@names.map { |some_id| '"' + some_id.to_s + '"' }.join(", ") %>];
+                    var costPerShuffle = 30;
+
+                    console.log(myNames[0]);
                     shufflebtn.onclick = function(){
-                        option0ele.innerHTML = "<%=@shuffle_first%>";
-                        option1ele.innerHTML = "<%=@shuffle_second%>";
+                        var coinsNum = parseInt(coinele.innerHTML);
+                        if(coinsNum < costPerShuffle){
+                          alert("sorry... not enough coins...");
+                          return;
+                        }
+                        do {
+                          var new_option0 = myNames[Math.floor(Math.random()*myNames.length)];
+                        } while (new_option0 == player);
+                        do {
+                          var new_option1 = myNames[Math.floor(Math.random()*myNames.length)];
+                        } while (new_option1 == player || new_option1 == new_option0);
+                        option0ele.innerHTML = new_option0;
+                        option1ele.innerHTML = new_option1;
                         myform.option0.value = option0ele.innerHTML;
                         myform.option1.value = option1ele.innerHTML;
-                        shufflebtn.style.visibility="hidden";
+                        coinsLeft = coinsNum - costPerShuffle;
+                        coinele.innerHTML = coinsLeft.toString();
+
+                        timesleft = parseInt(timesleftele.innerHTML);
+                        timesleft = timesleft - 1;
+                        if (timesleft == 0){
+                          timeleftbigele = document.getElementById("timesleftbig");
+                          timeleftbigele.parentNode.removeChild(timeleftbigele);
+                          shufflebtn.style.visibility = 'hidden';
+                        }else{
+                          timesleftele.innerHTML = timesleft.toString();
+                        }
+
+                        var myXHR = new XMLHttpRequest();
+                        myXHR.open("POST", "/shuffle_people" + "?tester=" + player + "&coinsLeft=" + coinele.innerHTML);
+                        myXHR.onreadystatechange = function() {
+                             if (this.readyState != 4) {
+                                return;
+                             }
+                             if (this.status == 200) {
+                                return;
+                             } else {
+                               console.log("error occurred!");
+                             }
+                         }
+                         myXHR.send();
                     }
                  //]]>
       </script>
