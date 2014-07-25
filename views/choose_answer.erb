@@ -94,25 +94,10 @@
 
 
 <div class="row">
-    <div class="col-xs-4 col-sm-2">  <font class="level_font"> Level: <%=@@level[session[:tester]]%>   </font></div>
-    <div class="col-xs-4 col-sm-3"> 
-        <font size="4pt">   
-        <div class="progress">
-          <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
-           <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
-          </div>
-        </div> 
-        </font>
-    </div>
+    <div class="col-xs-4 col-sm-2"></div>
+    <div class="col-xs-4 col-sm-3"></div>
     <div class="col-xs-1 col-sm-1">  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"></div>
     <div id="coinicon" class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div>
-  </div>
-  <div class="row">
-    <div class="col-xs-4 col-sm-2"> <font class="energy_font">Energy: </font><p id="energy_bar"><%= @@energy_left[session[:tester]] %></p> </div>
-    <div class="col-xs-4 col-sm-3" id="time_left"><%if @@energy_left[session[:tester]] == 5 %> Full Energy! <%end%></div>
-    <!-- Optional: clear the XS cols if their content doesn't match in height -->
-    <div id="gemicon" class="col-xs-1 col-sm-1"><img src="/img/diamond.jpg" alt="Smiley face" width="22" height="22"></div>
-    <div id="gemnum" class="col-xs-1 col-sm-1"><%=@@gems[session[:tester]]%></div>
   </div>
 
 
@@ -144,7 +129,6 @@
         </div>
       </div>
     </br>
-    </br></br>
       </br>
         <div class="container my-container">
          <div class="row">
