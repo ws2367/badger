@@ -9,7 +9,7 @@ require 'uuidtools'
 require 'twilio-ruby'
 
 IP = "107.170.232.66"
-PORT = 8002
+PORT = 7009
 GAME_CYCLE = 600
 REFILL = 480
 ENERGY_CAPACITY = 5
@@ -49,7 +49,7 @@ def import_questions
   CSV.foreach("questions.csv") do |row|
     # question, value, categ, dim, attribute
     @@questions << row[0]
-    @@categories[row[0]] = {value:row[1].to_i, categ:row[2]}
+    @@categories[row[0]] = {"value"=>row[1].to_i, "categ"=>row[2]}
   end
 
   @@questions.shuffle!
@@ -495,8 +495,8 @@ route :get, :post, '/view_my_report' do
 
   if @@spiderweb_buffer[@name] == nil
     @@spiderweb_buffer[@name] = Hash.new
-    @@spiderweb_buffer[@name][:old] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
-    @@spiderweb_buffer[@name][:new] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
+    @@spiderweb_buffer[@name]["old"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
+    @@spiderweb_buffer[@name]["new"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
   end
 
   @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now}
@@ -506,8 +506,11 @@ route :get, :post, '/view_my_report' do
                select{|quiz| (quiz["option0"] == @name) or (quiz["option1"] == @name)}
   
   relevants.each do |quiz|
-    value     = @@categories[quiz["question"]][:value]
-    category  = @@categories[quiz["question"]][:categ]
+    value     = @@categories[quiz["question"]]["value"]
+    category  = @@categories[quiz["question"]]["categ"]
+	puts "\n\n CAT and QS"
+	puts category
+	puts quiz["question"]
     # dim       = @@categories[quiz[:question]][:dim]
     # attribute = @@categories[quiz[:question]][:attribute]
 
@@ -526,46 +529,46 @@ route :get, :post, '/view_my_report' do
   puts "score after"
   puts @scores
 
-  time_diff_w_old = @scores["time"] - @@spiderweb_buffer[@name][:old]["time"]
-  time_diff_w_new = @scores["time"] - @@spiderweb_buffer[@name][:new]["time"]
+  time_diff_w_old = @scores["time"] - @@spiderweb_buffer[@name]["old"]["time"]
+  time_diff_w_new = @scores["time"] - @@spiderweb_buffer[@name]["new"]["time"]
 
   # First rule: Never too old
   if time_diff_w_old > TIME_DIFFERENCE_UPPER_BOUND
-    @@spiderweb_buffer[@name][:old] = @@spiderweb_buffer[@name][:new]
+    @@spiderweb_buffer[@name]["old"] = @@spiderweb_buffer[@name]["new"]
   # Second rule: Never too new
   elsif time_diff_w_new < TIME_DIFFERENCE_LOWER_BOUND
 
   else
     # Third rule: The one with larger difference stays
-    diff_w_old = (@scores["S"] - @@spiderweb_buffer[@name][:old]["S"]).abs + 
-                 (@scores["P"] - @@spiderweb_buffer[@name][:old]["P"]).abs + 
-                 (@scores["R"] - @@spiderweb_buffer[@name][:old]["R"]).abs
+    diff_w_old = (@scores["S"] - @@spiderweb_buffer[@name]["old"]["S"]).abs + 
+                 (@scores["P"] - @@spiderweb_buffer[@name]["old"]["P"]).abs + 
+                 (@scores["R"] - @@spiderweb_buffer[@name]["old"]["R"]).abs
 
-    diff_w_new = (@scores["S"] - @@spiderweb_buffer[@name][:new]["S"]).abs + 
-                 (@scores["P"] - @@spiderweb_buffer[@name][:new]["P"]).abs + 
-                 (@scores["R"] - @@spiderweb_buffer[@name][:new]["R"]).abs
+    diff_w_new = (@scores["S"] - @@spiderweb_buffer[@name]["new"]["S"]).abs + 
+                 (@scores["P"] - @@spiderweb_buffer[@name]["new"]["P"]).abs + 
+                 (@scores["R"] - @@spiderweb_buffer[@name]["new"]["R"]).abs
 
     if diff_w_new > diff_w_old
-      @@spiderweb_buffer[@name][:old] = @@spiderweb_buffer[@name][:new]
+      @@spiderweb_buffer[@name]["old"] = @@spiderweb_buffer[@name]["new"]
     end
   end
-  @@spiderweb_buffer[@name][:new] = @scores
+  @@spiderweb_buffer[@name]["new"] = @scores
 
   puts "spiderweb "
   puts @@spiderweb_buffer.inspect
 
   puts "time old"
-  puts @@spiderweb_buffer[@name][:old]["time"]
+  puts @@spiderweb_buffer[@name]["old"]["time"]
   puts "time new"
-  puts @@spiderweb_buffer[@name][:new]["time"]
+  puts @@spiderweb_buffer[@name]["new"]["time"]
 
-  @time_difference = sec_to_units(@@spiderweb_buffer[@name][:new]["time"] - @@spiderweb_buffer[@name][:old]["time"])
-  @oldR = @@spiderweb_buffer[@name][:old]["R"]
-  @oldP = @@spiderweb_buffer[@name][:old]["P"]
-  @oldS = @@spiderweb_buffer[@name][:old]["S"]
-  @newR = @@spiderweb_buffer[@name][:new]["R"]
-  @newP = @@spiderweb_buffer[@name][:new]["P"]
-  @newS = @@spiderweb_buffer[@name][:new]["S"]
+  @time_difference = sec_to_units(@@spiderweb_buffer[@name]["new"]["time"] - @@spiderweb_buffer[@name]["old"]["time"])
+  @oldR = @@spiderweb_buffer[@name]["old"]["R"]
+  @oldP = @@spiderweb_buffer[@name]["old"]["P"]
+  @oldS = @@spiderweb_buffer[@name]["old"]["S"]
+  @newR = @@spiderweb_buffer[@name]["new"]["R"]
+  @newP = @@spiderweb_buffer[@name]["new"]["P"]
+  @newS = @@spiderweb_buffer[@name]["new"]["S"]
 
   @contributors = collect_contributors(@name)
   erb :my_report
@@ -845,16 +848,13 @@ end
 
 post "/shuffle_people" do
   @@unlock_someone[session[:tester]] << Time.now
-
-  @@coins[params[:tester]] = params[:coinsLeft].to_i
+  @@coins[session[:tester]] = params[:coinsLeft].to_i
   
   status 200
   body ''
 end
 
 post "/shuffle_question" do
-  puts "coinsleft"
-  puts params[:coinsLeft]
   @@coins[session[:tester]] = params[:coinsLeft].to_i
   if session[:skippedquestions]
     session[:skippedquestions] << params[:oldq]

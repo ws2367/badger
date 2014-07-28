@@ -24,6 +24,9 @@
             border: 1px dashed rgba(0,0,0,.4);
   }
       }
+      #coinId{
+         display:inline-block;
+      }
     </style>
 
     <script type="text/JavaScript">
@@ -85,10 +88,9 @@
 <!-- NAVBAR
 ================================================== -->
   <body>
-    <div class="container marketing" style="background-color: #66CCFF;">
+   <div class="container marketing" style="background-color: #66CCFF;">
     <div class="row">
         <div class="col-xs-12 col-sm-12"><center><h1><font color="white">My Report</font></h1></div>
-    <!-- Optional: clear the XS cols if their content doesn't match in height -->
       </div>
  </div>
 </br>
@@ -207,25 +209,33 @@ var legend = svg.append("g")
     ================================================== -->
     <!-- Wrap the rest of the page in another container to center all the content. -->
 
-    <div style="background-color: #66CCFF;">
+
+    <div class="col-xs-12 col-sm-12"  style="background-color: #66CCFF;" ><center><font color="white" size="3pt">Spend <img src="/img/coin.jpg" width="17" height="17"> 300 to unlock an author</font></center></div>
+
+        <div class="col-xs-12 col-sm-12" style="background-color: #66CCFF;"> <center> 
+          <img src="/img/coin.jpg" width="22" height="22">
+      <font color="white"><div id="coinId"><%= @@coins[session[:tester]] %></div></font>
+</center>
+      </div>
+
+<!--    <div style="background-color: #66CCFF;">
       <div class="row">
         <div class="col-xs-12 col-sm-12"><center><font color="white" size="3pt">Spend <img src="/img/coin.jpg" width="17" height="17"> 300 to unlock an author</font></center></p></div>
-    <!-- Optional: clear the XS cols if their content doesn't match in height -->
-      </div>
-  <!-- <h1>Records</h1> -->
-  
-    <div class="row">
-      <div class="col-xs-4 col-sm-2"></div>
-      <div class="col-xs-4 col-sm-3"></div>
-      <div class="col-xs-1 col-sm-1">  
-        <img src="/img/coin.jpg" width="22" height="22">
-      </div>
-      <div id="coinId" class="col-xs-1 col-sm-1"><font color="white"><%= @@coins[session[:tester]] %></font></div>
+      </div> 
     </div>
-  </div>
+</div>-->
+   <!--   <div class="row">
+        <div class="col-xs-4 col-sm-2"></div>
+        <div class="col-xs-1 col-sm-1">  
+          <img src="/img/coin.jpg" width="22" height="22">
+        </div>
+      <font color="white"><div id="coinId" class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div></font>
+      </div>-->
 </br>
 
 
+
+<div class="container-marketing">
 
   <%@my_questions.each do |question|%>
     <%index_array = Array.new%>
@@ -294,7 +304,7 @@ var legend = svg.append("g")
 
       </br></br></br></br>
       <form class="form-horizontal" role="form" action="home" method="post">
-    <center><button type="submit" class="btn btn-danger btn-block">OK</button></center>
+    <center><button type="submit" class="btn btn-success btn-block">OK</button></center>
   </form>
 
       <!-- FOOTER -->
