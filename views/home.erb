@@ -13,88 +13,9 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/homepage.css">
 
-
-    <style>
-    .btn-block{
-      margin-bottom: 10px;
-    }
-    .my-first-container [class^="col-"] {
-          padding-top: 10px;
-          padding-bottom: 10px;
-          margin-bottom: 30px;
-          background-color: rgba(255,255,255,.0);
-          border: 1px dashed rgba(0,0,0,.4);
-
-          .my-inner {
-            padding: 5px;
-            background-color: rgba(255,255,255,.0);
-            border: 1px dashed rgba(0,0,0,.4);
-  }
-      }
-     .my-container [class^="col-"] {
-          padding-top: 10px;
-          padding-bottom: 10px;
-          background-color: rgba(255,255,255,.0);
-          border: 1px dashed rgba(0,0,0,.4);
-
-          .my-inner {
-            padding: 5px;
-            background-color: rgba(255,255,255,.0);
-            border: 1px dashed rgba(0,0,0,.4);
-  }
-      }
-    #energy_bar {
- display : inline-block;
-text-align:right;
-      color: #4CC552;
-      font-size: 12pt;
-    }
-    #time_left {
-       padding-left: 20pt;
- display : inline-block;
-text-align:left;
-       color: gray;
-       font-size: 9pt;
-    }
-
-    .energy_font{
-      color: #4CC552;
-      font-size: 12pt;
-    }
-    .level_font{
-      color: #4169e1;
-      font-size: 12pt;
-    }
-    .coins_font{
-      color: #FFD700;
-      font-size: 20pt;
-      display : inline-block;
-    }
-    .message_font{  
-      color: red;
-    }
-    .inline_form{
-      display : inline-block;
-    }
-    .buffer{
-      padding-bottom:20pt;
-    }
-    .collapsesub{
-      font-size: 10pt;
-      color: gray;
-    }
-    .collapsetitle{
-      font-size: 12pt;
-
-    }
-    .panel-heading {background-color: #CCFFFF!important}
-
-    .progress{
-      margin-top: 4px;
-      max-height: 10px;
-    }
-    </style>
+ 
 
     <script type="text/JavaScript">
     //<![CDATA[
@@ -143,6 +64,34 @@ text-align:left;
     //]]>
     </script>
 
+    <style>
+        .my-first-container [class^="col-"] {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          margin-bottom: 30px;
+          background-color: rgba(255,255,255,.0);
+          border: 1px dashed rgba(0,0,0,.4);
+
+          .my-inner {
+            padding: 5px;
+            background-color: rgba(255,255,255,.0);
+            border: 1px dashed rgba(0,0,0,.4);
+  }
+      }
+     .my-container [class^="col-"] {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          background-color: rgba(255,255,255,.0);
+          border: 1px dashed rgba(0,0,0,.4);
+
+          .my-inner {
+            padding: 5px;
+            background-color: rgba(255,255,255,.0);
+            border: 1px dashed rgba(0,0,0,.4);
+  }
+      }
+    </style>
+
   </head>
 <!-- NAVBAR
 ================================================== -->
@@ -155,42 +104,81 @@ text-align:left;
 
     <div class="container marketing">
 
-  <div class="row">
-    <div class="col-xs-4 col-sm-2">  
+     <script type="text/JavaScript">
+    //<![CDATA[
+        var medalClicked=function(){
+          var myform = document.forms["rankingsform"];
+          myform.submit();
+        }
+        var refillEnergy=function(){
+           var gemele = document.getElementById("gemnum");
+           var gemnum = gemele.innerHTML;
+           if(gemnum == "0"){
+              alert("Not enough gems...");
+              return;
+           }
+           if(confirm("Do you want to spend 1 gem to refill energy?")){
+              var myform = document.forms["nextform"];
+              myform.submit();
+           }
+        }
+        //]]>
+    </script>
 
+    <form id="nextform" role="form" action="refill" method="post">   
+           <input type="hidden" name="tester" value="<%=session[:tester]%>"> 
+    </form>
+    <form id="rankingsform" class="form-horizontal" role="form" action="rankings" method="post">
+    </form>
+
+  <div class="row">
+    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+        <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
+      </center>
     </div>
-    <div class="col-xs-4 col-sm-3"><center><font size="5pt"><b>Home</b></font></center></div>
+    <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
     <!-- Optional: clear the XS cols if their content doesn't match in height -->
-    <div class="col-xs-3 col-sm-3">
-          <form class="form-horizontal" role="form" action="rankings" method="post">
-              <button type="submit" class="btn btn-warning btn-sm">Rankings</button>
-          </form>
+    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><div id="gemnum"><%=@@gems[session[:tester]]%></div>
+    </center>
     </div>
   </div>
+
+
+
+
+  <div class="row">
+
+    <div id="medal_display" class="col-xs-2 col-sm-2" onclick="medalClicked()"><center>
+        <img src="/img/medal.png" alt="Smiley face" width="25" height="25">
+      </center>
+    </div>
+    <div id="level_display" class="col-xs-5 col-sm-3"><center>Level <%=@@level[session[:tester]]%> </center></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="energy_display" class="col-xs-2 col-sm-1" onclick="refillEnergy()"><center><img src="/img/energy.png" alt="Smiley face" width="25" height="25"><div id="energy_bar"><%= @@energy_left[session[:tester]] %></div>
+    </center>
+    </div>
+    <div id="time_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center>
+      <%if @@energy_left[session[:tester]] == 5 %> Full <%end%></div>
+    </center>
+    </div>
+  </div>
+
+
+     <script type="text/JavaScript">
+    //<![CDATA[
+       var level_element = document.getElementById("level_display");
+       var progress = <%=@@progress[session[:tester]]%>;
+       var whitewidth = 100 - progress;
+       var imageText = (("linear-gradient(to left, #FFFFFF ").concat(whitewidth.toString())).concat("%,#f4d1ec 0%)")
+       level_display.style.backgroundImage = imageText;
+
+        //]]>
+    </script>
 
   <!-- <h1>Records</h1> -->
+</br>
 
-  <div class="row">
-    <div class="col-xs-4 col-sm-2">  <font class="level_font"> Level: <%=@@level[session[:tester]]%>   </font></div>
-    <div class="col-xs-4 col-sm-3"> 
-        <font size="4pt">   
-        <div class="progress">
-          <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
-           <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
-          </div>
-        </div> 
-        </font>
-    </div>
-    <div class="col-xs-1 col-sm-1">  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"></div>
-    <div class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div>
-  </div>
-  <div class="row">
-    <div class="col-xs-4 col-sm-2"> <font class="energy_font">Energy: </font><p id="energy_bar"><%= @@energy_left[session[:tester]] %></p> </div>
-    <div class="col-xs-4 col-sm-3" id="time_left"><%if @@energy_left[session[:tester]] == 5 %> Full Energy! <%end%></div>
-    <!-- Optional: clear the XS cols if their content doesn't match in height -->
-    <div id="gemicon" class="col-xs-1 col-sm-1"><img src="/img/diamond.jpg" alt="Smiley face" width="22" height="22"></div>
-    <div id="gemnum" class="col-xs-1 col-sm-1"><%=@@gems[session[:tester]]%></div>
-  </div>
+      <div class="container marketing">
 
   <div class="col-xs-16 col-sm-7">
   <div class="panel-group" id="accordion">
@@ -297,31 +285,13 @@ text-align:left;
 </div>
 </div>
 
-<form id="nextform" role="form" action="refill" method="post">   
-           <input type="hidden" name="tester" value="<%=session[:tester]%>"> 
-</form>
+
 
 
 
   <script type="text/javascript">
   //<![CDATA[
-     gemicon = document.getElementById("gemicon");
-     gemele = document.getElementById("gemnum");
-     gemele.onclick = function(){ refill_energy(); }
-     gemicon.onclick = function(){ refill_energy(); }
 
-    function refill_energy() {
-       var gemele = document.getElementById("gemnum");
-       var gemnum = gemele.innerHTML;
-       if(gemnum == "0"){
-          alert("Not enough gems...");
-          return;
-       }
-       if(confirm("Do you want to spend 1 gem to refill energy?")){
-          var myform = document.forms["nextform"];
-          myform.submit();
-       }
-    }
 
     energy = <%=@@energy_left[session[:tester]]%>
     cycle = 480;
@@ -332,13 +302,13 @@ text-align:left;
     }
   
     if(energy < 5){
-       setInterval(function(){update_energy("energy_bar","time_left","play_btn")},1000);
+       setInterval(function(){update_energy("energy_bar","time_display","play_btn")},1000);
        if(energy == 0){
            var btn_container = document.getElementById("play_btn");
            btn_container.disabled = true;
            btn_container.innerHTML = "Gotta have energy to play...";
        }
-       var time_container = document.getElementById("time_left");
+       var time_container = document.getElementById("time_display");
        time_container.innerHTML = get_min_sec(secs_left);
     }
     function update_energy(containerID,timeID,playbtnID){
@@ -361,7 +331,7 @@ text-align:left;
            secs_left = secs_left -1;
         }
         if(energy == 5){
-            time_container.innerHTML = "Full Energy!";
+            time_container.innerHTML = "Full";
         }else{
             time_container.innerHTML = get_min_sec(secs_left);
         }
@@ -374,7 +344,11 @@ text-align:left;
     function get_min_sec(secs){
       var min = Math.floor(secs/60);
       var sec = secs%60;
-      return ((min.toString()).concat(" : ")).concat(sec.toString());
+      if(sec < 10){
+        return "0".concat((min.toString()).concat(":0")).concat(sec.toString());
+      }else{
+        return "0".concat((min.toString()).concat(":")).concat(sec.toString());
+      }
     }
   //]]>
   </script>

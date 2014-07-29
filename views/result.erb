@@ -15,6 +15,8 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/homepage.css">
+
 
   </head>
 <!-- NAVBAR
@@ -27,6 +29,18 @@
     <!-- Wrap the rest of the page in another container to center all the content. -->
 
     <div class="container marketing">
+
+  <div class="row">
+    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+        <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
+      </center>
+    </div>
+    <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><%=@@gems[session[:tester]]%></div>
+    </center>
+    </div>
+  </div>
   <!-- <h1>Records</h1> -->
 </br>
 </br>

@@ -955,7 +955,14 @@ get '/admin/share' do
   erb :share_record
 end
 
+get '/css/*.*' do |path, ext|
+  send_file 'css/' + path + '.' + ext
+end
 
+
+get '/fonts/*.*' do |path, ext|
+  send_file 'fonts/' + path + '.' + ext
+end
 
 get '/js/*.*' do |path, ext|
   send_file 'js/' + path + '.' + ext

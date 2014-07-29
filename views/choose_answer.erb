@@ -15,8 +15,11 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/homepage.css">
 
     <style>
+    
+
     .coins_font{
       color: #FFA500;
       font-size: 20pt;
@@ -50,6 +53,9 @@
     }
     #questionid{
       padding-right: 10px;
+    }
+    #coinicon{
+      display: inline-block;
     }
     </style>
 
@@ -93,11 +99,16 @@
     <div class="container">
 
 
-<div class="row">
-    <div class="col-xs-4 col-sm-2"></div>
-    <div class="col-xs-4 col-sm-3"></div>
-    <div class="col-xs-1 col-sm-1">  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"></div>
-    <div id="coinicon" class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div>
+   <div class="row">
+    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+        <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
+      </center>
+    </div>
+    <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><div id="coinicon"><%= @@coins[session[:tester]] %></div></center></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><%=@@gems[session[:tester]]%>
+    </center>
+    </div>
   </div>
 
 
