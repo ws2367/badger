@@ -8,7 +8,9 @@ require 'csv'
 require 'uuidtools'
 require 'twilio-ruby'
 
-IP = "107.170.232.66"
+require './librarian.rb'
+
+IP = "0.0.0.0"
 PORT = 7009
 GAME_CYCLE = 600
 REFILL = 480
@@ -91,7 +93,7 @@ def initialize_record
   @@record_comments = Hash.new
   @@record_asks = Hash.new
   @@asking_queue = Hash.new
-  @@last_played = Hash.new
+  # @@last_played = Hash.new
   @@questions_left = Hash.new
   @@energy_left = Hash.new
   @@started_playing = Hash.new
@@ -100,15 +102,15 @@ def initialize_record
   @@coins = Hash.new
   @@unlocked = Hash.new
   @@others_comments = Hash.new
-  @@bundle_played = Hash.new
+  # @@bundle_played = Hash.new
 
   #cf70
-  @@generated_bundles = Hash.new
+  # @@generated_bundles = Hash.new
   @@level = Hash.new
   @@progress = Hash.new
   @@gems = Hash.new
   @@unlocked_uuid_index = Hash.new
-  @@data_to_w_r = ["categories", "spiderweb_buffer","bundle_played", "logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "generated_bundles", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
+  @@data_to_w_r = ["categories", "spiderweb_buffer","logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
   @@wins = Hash.new
   @@losses = Hash.new
 
@@ -125,6 +127,9 @@ def initialize_record
   @@record = Array.new 
   prng = Random.new(1234)
   @@score = Array.new(@@names.count){|i|Array.new(@@questions.count,prng.rand(2))}
+
+  @@librarian = Librarian.new(@@names)
+  @@librarian.create_parcel("shaws", Array.new)
 end
 
 def initialize_independent_urls
@@ -163,7 +168,6 @@ def initilize_variables
     @@use_gems[name] = Array.new
     @@unlock_someone[name] = Array.new
     @@logged_in[name] = Array.new
-    @@bundle_played[name] = Array.new
   end
 end
 
@@ -307,9 +311,7 @@ post '/choose_answer' do
 
   if session[:choose] == nil
     session[:choose] = 1
-    if @@generated_bundles[session[:tester]] == nil
-      @@generated_bundles[session[:tester]] = Array.new
-    end
+    
     session[:bundle] = Array.new
   else
     session[:choose] = session[:choose] + 1
@@ -335,11 +337,7 @@ post '/choose_answer' do
   end
 
   if session[:choose] == 4
-    bundle_index_array = Array.new
-    uuid = UUIDTools::UUID.random_create.to_s
-    bundle_index_array[0] = uuid
-    bundle_index_array[1] = session[:bundle]
-    @@generated_bundles[session[:tester]] << bundle_index_array
+    @@librarian.create_parcel(session[:tester], session[:bundle])
     clear_session
     redirect to('/choose_ending'), 307
   end
@@ -452,25 +450,8 @@ end
 route :get, :post, '/view_my_report' do
   @@view_report[session[:tester]] << Time.now
 
-  @my_questions = Array.new
-  @@names.each do |name|
-     next if name==session[:tester]
-     bundle_array = @@generated_bundles[name]
-     next if bundle_array==nil
-     bundle_array.each do |bundle|
-        quiz_array = bundle[1]
-        if quiz_array[0]["option0"] == session[:tester] or quiz_array[0]["option1"] == session[:tester]
-          quiz_array.each_with_index do |quiz, index|
-             my_array = Array.new
-             my_array << bundle[0]
-             my_array << index
-             my_array << name
-             my_array << quiz
-             @my_questions << my_array
-          end
-        end
-     end
-  end
+  @my_questions = @@librarian.get_questions_of(session[:tester], @@names)
+
   @my_questions.shuffle!
 
   #-------- Below is about calculating the spider web! --------#
@@ -502,8 +483,10 @@ route :get, :post, '/view_my_report' do
   @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now}
 
   # first flatten the parcels to an array of quizes only 
-  relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
-               select{|quiz| (quiz["option0"] == @name) or (quiz["option1"] == @name)}
+  relevants = @@librarian.get_relevant_quizzes(@name)
+
+  # relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
+  #              select{|quiz| (quiz["option0"] == @name) or (quiz["option1"] == @name)}
   
   relevants.each do |quiz|
     value     = @@categories[quiz["question"]]["value"]
@@ -574,17 +557,6 @@ route :get, :post, '/view_my_report' do
   erb :my_report
 end
 
-def find_bundle(uuid)
-  @@names.each do |name|
-    next if @@generated_bundles[name] == nil
-    @@generated_bundles[name].each do |bundle|
-      if bundle[0] == uuid
-        return [name, bundle[1]]
-      end
-    end
-  end
-end
-
 post '/play' do
   @@play_others[session[:tester]] << Time.now
 
@@ -596,11 +568,11 @@ post '/play' do
   end
 
   if params[:uuid]
-    return_array = find_bundle(params[:uuid])
+    return_array = @@librarian.get_bundle_by_uuid(params[:uuid], @@names)
     quiz_array = return_array[1]
     session[:bundle] = quiz_array
     session[:guesswhom] = return_array[0]
-    @@bundle_played[session[:tester]] << params[:uuid]
+    @@librarian.just_played(session[:tester], params[:uuid])
   end
 
   if params[:correct]

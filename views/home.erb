@@ -259,12 +259,12 @@ text-align:left;
         <%name_array = @@names.shuffle%>
         <%name_array.each do |name|%>
             <%next if name==session[:tester]%>
-            <%bundle_array = @@generated_bundles[name]%>
+            <%bundle_array = @@librarian.get_parcels(name)%>
             <%next if bundle_array==nil %>
             <div class="row">
               <center>Guess what <%=name%> thinks about... </center>
             <%bundle_array.each do |bundle|%>
-              <%next if @@bundle_played[session[:tester]].include?(bundle[0])%>
+              <%next if @@librarian.has_played?(session[:tester], bundle[0])%>
               <%quiz_array = bundle[1]%>
               <%puts "quiz_array[0]"%>
               <%puts quiz_array[0][:option0]%>
