@@ -18,20 +18,35 @@
 class Librarian
 
   def initialize all_names
+    @records = Hash.new
     @bundles = Hash.new
     @bundles_played = Hash.new
     all_names.each do |name|
       initialize_for_a_player name
     end
+    puts "bundle whole first"
+    puts @bundles.inspect
   end  
 
   def initialize_for_a_player name
+    @records[name] = Array.new if @records[name] == nil
     @bundles[name] = Array.new if @bundles[name] == nil
     @bundles_played[name] = Array.new if @bundles_played[name] == nil
   end
 
   def add_player name
     initialize_for_a_player name
+  end
+
+  # win_record = ["true", "true", "false"]
+  def record_win(guesser, uuid, win_record)
+    author, bundle = get_bundle_by_uuid(uuid)
+    @records[author] << {guesser: guesser, win_record: win_record, bundle:bundle}
+  end
+
+  # return an array of records
+  def wins_with_author author
+    return @records[author]
   end
 
   def just_played name, uuid
@@ -59,18 +74,20 @@ class Librarian
   # return_value = [
   #                  [bundle_uuid, index, tester_name, quiz]
   #                ]
-  def get_questions_of(tester_name, all_names)
+  def get_questions_of(tester_name)
     my_questions = Array.new
-    all_names.each do |name|
+    
+    @bundles.each do |name, parcels|
       next if name == tester_name
-      bundle_array = @bundles[name]
-      next if bundle_array == nil
-      bundle_array.each do |bundle|
-        quiz_array = bundle[1]
-        if quiz_array[0]["option0"] == tester_name or 
-           quiz_array[0]["option1"] == tester_name
-          quiz_array.each_with_index do |quiz, index|
-            my_array = [bundle[0], index, name, quiz]
+      next if parcels == nil
+    
+      parcels.each do |parcel|
+        bundle = parcel[1]
+    
+        if bundle[0]["option0"] == tester_name or 
+           bundle[0]["option1"] == tester_name
+          bundle.each_with_index do |quiz, index|
+            my_array = [parcel[0], index, name, quiz]
             my_questions << my_array
           end
         end
@@ -80,10 +97,9 @@ class Librarian
   end
 
   # return the name and the matched bundle
-  def get_bundle_by_uuid(uuid, all_names)
-    all_names.each do |name|
-      next if @bundles[name] == nil
-      @bundles[name].each do |parcel|
+  def get_bundle_by_uuid uuid
+    @bundles.each do |name, parcels|
+      parcels.each do |parcel|
         return [name, parcel[1]] if parcel[0] == uuid
       end
     end

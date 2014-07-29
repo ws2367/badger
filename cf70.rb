@@ -85,14 +85,14 @@ end
 def initialize_record
 
   @@tester_progress = Array.new(@@names.count, -1)
-  @@phone_number = Hash.new
-  @@sharing_queue = Hash.new
+  # @@phone_number = Hash.new
+  # @@sharing_queue = Hash.new
 
   #Iru
-  @@people_asks = Hash.new
-  @@record_comments = Hash.new
-  @@record_asks = Hash.new
-  @@asking_queue = Hash.new
+  # @@people_asks = Hash.new
+  # @@record_comments = Hash.new
+  # @@record_asks = Hash.new
+  # @@asking_queue = Hash.new
   # @@last_played = Hash.new
   @@questions_left = Hash.new
   @@energy_left = Hash.new
@@ -129,7 +129,6 @@ def initialize_record
   @@score = Array.new(@@names.count){|i|Array.new(@@questions.count,prng.rand(2))}
 
   @@librarian = Librarian.new(@@names)
-  @@librarian.create_parcel("shaws", Array.new)
 end
 
 def initialize_independent_urls
@@ -253,10 +252,12 @@ end
 
 get '/home' do
   puts "name: " + params["name"]
+  
 
   @@names << params["name"]
   add_new_player
 
+  clear_session
   session[:tester] = params["name"]
   if @@started_playing[session[:tester]] == nil
     set_interval(REFILL, session[:tester])
@@ -267,11 +268,11 @@ get '/home' do
 end
 
 get '/' do
-  if params[:id] == nil
+  # if params[:id] == nil
     erb :login
-  else
-    erb :tel
-  end
+  # else
+  #   erb :tel
+  # end
   # Who are you?
   #erb :home
   # if params[:id]
@@ -291,32 +292,26 @@ get '/tel' do
   erb :tel
 end
 
-post '/welcome' do
-  @current_tester = session[:tester]
+# post '/welcome' do
+#   @current_tester = session[:tester]
 
-  if session[:stage] == "tel"
-    session[:stage] = nil
-    if (@@phone_number[@current_tester] == nil) or 
-       (params[:skip] != "yes")
+#   if session[:stage] == "tel"
+#     session[:stage] = nil
+#     if (@@phone_number[@current_tester] == nil) or 
+#        (params[:skip] != "yes")
 
-      phone_number = params[:phone_number]
+#       phone_number = params[:phone_number]
 
-      #@@client.account.messages.create(
-      #  :from => '+17183955452',
-      #  :to => phone_number,
-      #  :body => 'Welcome, %s! Ready to play the game? :-)' % @current_tester
-      #)
-
-      @@phone_number[@current_tester] = phone_number  
-    end
-  end
-  if @@started_playing[session[:tester]] == nil
-     set_interval(REFILL, session[:tester])
-     @@started_playing[session[:tester]] = TRUE
-  end
-  @@logged_in[session[:tester]] << Time.now
-  redirect to('/home'), 307
-end
+#       @@phone_number[@current_tester] = phone_number  
+#     end
+#   end
+#   if @@started_playing[session[:tester]] == nil
+#      set_interval(REFILL, session[:tester])
+#      @@started_playing[session[:tester]] = TRUE
+#   end
+#   @@logged_in[session[:tester]] << Time.now
+#   redirect to('/home'), 307
+# end
 
 post '/choose_people' do
   @@play_answer[session[:tester]] << Time.now
@@ -379,6 +374,7 @@ post '/choose_answer' do
   end
 
   if session[:choose] == 4
+    
     @@librarian.create_parcel(session[:tester], session[:bundle])
     clear_session
     redirect to('/choose_ending'), 307
@@ -475,6 +471,7 @@ def normalize_score scores
   }
   return res
 end
+
 #  tan(0.25 * PI)/30 = m => m = 0.033
 def sec_to_units seconds
   mm, ss = seconds.divmod(60)
@@ -492,7 +489,7 @@ end
 route :get, :post, '/view_my_report' do
   @@view_report[session[:tester]] << Time.now
 
-  @my_questions = @@librarian.get_questions_of(session[:tester], @@names)
+  @my_questions = @@librarian.get_questions_of(session[:tester])
 
   @my_questions.shuffle!
 
@@ -533,9 +530,7 @@ route :get, :post, '/view_my_report' do
   relevants.each do |quiz|
     value     = @@categories[quiz["question"]]["value"]
     category  = @@categories[quiz["question"]]["categ"]
-	puts "\n\n CAT and QS"
-	puts category
-	puts quiz["question"]
+	
     # dim       = @@categories[quiz[:question]][:dim]
     # attribute = @@categories[quiz[:question]][:attribute]
 
@@ -579,14 +574,6 @@ route :get, :post, '/view_my_report' do
   end
   @@spiderweb_buffer[@name]["new"] = @scores
 
-  puts "spiderweb "
-  puts @@spiderweb_buffer.inspect
-
-  puts "time old"
-  puts @@spiderweb_buffer[@name]["old"]["time"]
-  puts "time new"
-  puts @@spiderweb_buffer[@name]["new"]["time"]
-
   @time_difference = sec_to_units(@@spiderweb_buffer[@name]["new"]["time"] - @@spiderweb_buffer[@name]["old"]["time"])
   @oldR = @@spiderweb_buffer[@name]["old"]["R"]
   @oldP = @@spiderweb_buffer[@name]["old"]["P"]
@@ -606,19 +593,18 @@ post '/play' do
     session[:round] = 1
     session[:correct_history] = Array.new
   else
-    session[:round] = session[:round] + 1
+    session[:round] += 1
   end
 
+  # start the guessing
   if params[:uuid]
-    return_array = @@librarian.get_bundle_by_uuid(params[:uuid], @@names)
-    quiz_array = return_array[1]
-    session[:bundle] = quiz_array
-    session[:guesswhom] = return_array[0]
+    name, bundle = @@librarian.get_bundle_by_uuid(params[:uuid])
+    session[:guesswhom], session[:bundle] = name, bundle
     @@librarian.just_played(session[:tester], params[:uuid])
   end
 
+  # in the middle of guessing
   if params[:correct]
-    puts "im here..."
     session[:correct_history] << params[:correct]
   end
 
@@ -636,7 +622,7 @@ post '/result' do
   @win = 0
   session[:correct_history].each do |value|
     if value == "true"
-       @win = @win + 1
+       @win += 1
     end
   end
   if @win == 0
@@ -648,16 +634,17 @@ post '/result' do
   else
     @reward = 50
   end
-  @@coins[session[:tester]] = @@coins[session[:tester]] + @reward
+  @@coins[session[:tester]] += @reward
 
   addupXP(@reward, session[:tester])
     
   if @win >= 2
     @correct = true
-    @@wins[session[:tester]] = @@wins[session[:tester]] + 1
+    @@wins[session[:tester]] += 1
+    @@librarian.record_win(session[:tester], session[:uuid], session[:correct_history])
   else
     @correct = false
-    @@losses[session[:tester]] = @@losses[session[:tester]] + 1
+    @@losses[session[:tester]] += 1
   end
   erb :result
 end
@@ -790,53 +777,6 @@ post '/next' do
   end
 end
 
-post '/who_to_share' do
-  erb :who_to_share
-end
-
-
-post '/share' do
-  options = [session[:option0], session[:option1]]
-  question = session[:question]
-  @current_tester = session[:tester]
-  receiver = params[:name]
-
-  uuid = UUIDTools::UUID.random_create.to_s
-  @@sharing_queue[uuid] = {question: question, 
-                            options: options, 
-                     time_of_asking: Time.now, 
-                              asker: @current_tester, 
-                      asker_thought: params[:thought],
-                           receiver: receiver,
-                  answered_by_asker: false}
-
-  link = URL + "/answer_share?uuid=" + uuid
-  message = "Hey! %s is asking you %s Click to answer! %s" % [@current_tester, question, link]
-  @@client.account.messages.create(
-    :from => '+17183955452',
-    :to => @@phone_number[receiver],
-    :body => message
-  )
-
-  puts link
-  redirect to('/start'), 307
-end
-
-get "/answer_share" do
-  uuid = params[:uuid]
-  sharing = @@sharing_queue[uuid]
-  
-  @asker = sharing[:asker]
-  @question = sharing[:question]
-  @options = sharing[:options]
-  @asker_thought = sharing[:asker_thought]
-
-  @current_tester = sharing[:receiver]
-
-  session[:uuid] = uuid
-  session[:tester] = @current_tester
-  erb :answer_share
-end
 
 post "/unlock" do
   @@unlock_someone[session[:tester]] << Time.now
@@ -907,185 +847,6 @@ get "/read_all_data" do
   end
   status 200
   body ''
-end
-
-post "/why" do
-  record_index = params[:index].to_i 
-  record = @@record[record_index]
-  receiver = record[0] 
-  if receiver == session[:tester]
-    session[:reason_index] = record_index
-    redirect to('/edit_reason'), 307
-  end
-  if @@people_asks[session[:tester]] == nil
-      index_array = Array.new
-      index_array << params[:index]
-      @@people_asks[session[:tester]] = index_array
-  else
-      index_array = @@people_asks[session[:tester]]
-      index_array << params[:index]
-  end
-
-  if @@record_asks[record_index] == nil
-      @@record_asks[record_index] = 1;
-  else
-      @@record_asks[record_index] = @@record_asks[record_index]+1;
-  end
-  
-  @current_tester = session[:tester]
-  if record[2] == record[3]
-       not_chosen = record[4]
-  else
-       not_chosen = record[3]
-  end
-
-  uuid = UUIDTools::UUID.random_create.to_s
-  @@asking_queue[uuid] = {recordID: params[:index],
-                          question: record[1],
-                            chosen: record[2],
-                            not_chosen: not_chosen,
-                     time_of_asking: Time.now,
-                              asker: @current_tester,
-                           receiver: receiver,
-                  answered_by_asker: false}
-
-  link = URL + "/answer_ask?uuid=" + uuid
-  
-  begin 
-     message = "Hey! %s is asking you why you chose %s in the question %s Click to answer! %s" % [@current_tester, record[2], record[1], link]
-     @@client.account.messages.create(
-       :from => '+17183955452',
-       :to => @@phone_number[receiver],
-       :body => message
-     )
-  rescue
-  end
-
-  redirect to('/lobby'), 307
-end
-
-post "/edit_reason" do
-  erb :edit_reason
-end
-
-post "/edit_comment" do
-  session[:comment_index] = params[:index].to_i
-  erb :edit_comment
-end
-
-post "/done_reason" do
-  index = session[:reason_index]
-  session[:reason_index] = nil
-  if @@record_comments[index] == nil
-      comment_array = Array.new
-      comment_array << params[:thought]
-      @@record_comments[index] = comment_array
-  else
-      comment_array = @@record_comments[index]
-      comment_array << params[:thought]
-  end
-  redirect to('/lobby'), 307
-end
-
-post "/done_comment" do
-  index = session[:comment_index]
-  session[:comment_index] = nil
-  if @@others_comments[index] == nil
-      comment = Array.new
-      comment[0] = session[:tester]
-      comment[1] = params[:thought]
-      comments_array = Array.new
-      comments_array << comment
-      @@others_comments[index] = comments_array
-  else
-      comment = Array.new
-      comment[0] = session[:tester]
-      comment[1] = params[:thought]
-      comments_array = @@others_comments[index]
-      comments_array << comment
-  end
-  redirect to('/lobby'), 307
-end
-
-get "/answer_ask" do
-  uuid = params[:uuid]
-  session[:uuid] = uuid
-  asking = @@asking_queue[uuid]
-
-  @asker = asking[:asker]
-  @question = asking[:question]
-  @chosen = asking[:chosen]
-  @not_chosen = asking[:not_chosen]
-
-  @current_tester = asking[:receiver]
-
-  session[:uuid] = uuid
-  session[:tester] = @current_tester
-  erb :answer_ask
-end
-
-post "/reply_ask" do
-  uuid = session[:uuid]
-  session[:uuid] = nil
-
-  @@asking_queue[uuid][:receiver_thought] = params[:thought]
-  @@asking_queue[uuid][:time_of_replying] = Time.now
-
-  record_index = @@asking_queue[uuid][:recordID].to_i
-  if @@record_comments[record_index] == nil
-      comment_array = Array.new
-      comment_array << params[:thought]
-      @@record_comments[record_index] = comment_array
-  else
-      comment_array = @@record_comments[record_index]
-      comment_array << params[:thought]
-  end
-
-  redirect to('/lobby'), 307
-end
-
-post "/reply_share" do
-  name = params[:name]
-  uuid = session[:uuid]
-  session[:uuid] = nil
-
-  @@sharing_queue[uuid][:answer] = name
-  @@sharing_queue[uuid][:receiver_thought] = params[:thought]
-  @@sharing_queue[uuid][:time_of_replying] = Time.now
-
-
-  uri = Addressable::URI.parse(URL + "/sharing_history")
-  uri.query_values = {
-    'tester'  => @@sharing_queue[uuid][:asker]
-  }
-
-  puts uri.to_s
-  # link = URL + "/sharing_history?tester=" + 
-  message = "%s replied your question! Go to Check sharing! to see it! %s" % [@@sharing_queue[uuid][:receiver], uri.to_s]
-
-  @@client.account.messages.create(
-    :from => '+17183955452',
-    :to => @@phone_number[@@sharing_queue[uuid][:asker]],
-    :body => message
-  )
-
-  redirect to('/start'), 307
-end
-
-get "/sharing_history" do 
-  session[:tester] = params[:tester] if params[:tester]
-    
-  tmp = @@sharing_queue.select do |uuid, share| 
-    (share[:asker] == session[:tester])
-  end
-
-  if tmp
-    @sharings = tmp.values
-  else
-    @sharings = Array.new
-  end
-
-  erb :sharing_history
 end
 
 def calculate_slowdown
@@ -1173,3 +934,233 @@ end
 get '/img/*.*' do |path, ext|
   send_file 'img/' + path + '.' + ext
 end
+
+
+
+# post '/who_to_share' do
+#   erb :who_to_share
+# end
+
+
+# post '/share' do
+#   options = [session[:option0], session[:option1]]
+#   question = session[:question]
+#   @current_tester = session[:tester]
+#   receiver = params[:name]
+
+#   uuid = UUIDTools::UUID.random_create.to_s
+#   @@sharing_queue[uuid] = {question: question, 
+#                             options: options, 
+#                      time_of_asking: Time.now, 
+#                               asker: @current_tester, 
+#                       asker_thought: params[:thought],
+#                            receiver: receiver,
+#                   answered_by_asker: false}
+
+#   link = URL + "/answer_share?uuid=" + uuid
+#   message = "Hey! %s is asking you %s Click to answer! %s" % [@current_tester, question, link]
+#   @@client.account.messages.create(
+#     :from => '+17183955452',
+#     :to => @@phone_number[receiver],
+#     :body => message
+#   )
+
+#   puts link
+#   redirect to('/start'), 307
+# end
+
+# get "/answer_share" do
+#   uuid = params[:uuid]
+#   sharing = @@sharing_queue[uuid]
+  
+#   @asker = sharing[:asker]
+#   @question = sharing[:question]
+#   @options = sharing[:options]
+#   @asker_thought = sharing[:asker_thought]
+
+#   @current_tester = sharing[:receiver]
+
+#   session[:uuid] = uuid
+#   session[:tester] = @current_tester
+#   erb :answer_share
+# end
+
+# post "/why" do
+#   record_index = params[:index].to_i 
+#   record = @@record[record_index]
+#   receiver = record[0] 
+#   if receiver == session[:tester]
+#     session[:reason_index] = record_index
+#     redirect to('/edit_reason'), 307
+#   end
+#   if @@people_asks[session[:tester]] == nil
+#       index_array = Array.new
+#       index_array << params[:index]
+#       @@people_asks[session[:tester]] = index_array
+#   else
+#       index_array = @@people_asks[session[:tester]]
+#       index_array << params[:index]
+#   end
+
+#   if @@record_asks[record_index] == nil
+#       @@record_asks[record_index] = 1;
+#   else
+#       @@record_asks[record_index] = @@record_asks[record_index]+1;
+#   end
+  
+#   @current_tester = session[:tester]
+#   if record[2] == record[3]
+#        not_chosen = record[4]
+#   else
+#        not_chosen = record[3]
+#   end
+
+#   uuid = UUIDTools::UUID.random_create.to_s
+#   @@asking_queue[uuid] = {recordID: params[:index],
+#                           question: record[1],
+#                             chosen: record[2],
+#                             not_chosen: not_chosen,
+#                      time_of_asking: Time.now,
+#                               asker: @current_tester,
+#                            receiver: receiver,
+#                   answered_by_asker: false}
+
+#   link = URL + "/answer_ask?uuid=" + uuid
+  
+#   begin 
+#      message = "Hey! %s is asking you why you chose %s in the question %s Click to answer! %s" % [@current_tester, record[2], record[1], link]
+#      @@client.account.messages.create(
+#        :from => '+17183955452',
+#        :to => @@phone_number[receiver],
+#        :body => message
+#      )
+#   rescue
+#   end
+
+#   redirect to('/lobby'), 307
+# end
+
+# post "/edit_reason" do
+#   erb :edit_reason
+# end
+
+# post "/edit_comment" do
+#   session[:comment_index] = params[:index].to_i
+#   erb :edit_comment
+# end
+
+# post "/done_reason" do
+#   index = session[:reason_index]
+#   session[:reason_index] = nil
+#   if @@record_comments[index] == nil
+#       comment_array = Array.new
+#       comment_array << params[:thought]
+#       @@record_comments[index] = comment_array
+#   else
+#       comment_array = @@record_comments[index]
+#       comment_array << params[:thought]
+#   end
+#   redirect to('/lobby'), 307
+# end
+
+# post "/done_comment" do
+#   index = session[:comment_index]
+#   session[:comment_index] = nil
+#   if @@others_comments[index] == nil
+#       comment = Array.new
+#       comment[0] = session[:tester]
+#       comment[1] = params[:thought]
+#       comments_array = Array.new
+#       comments_array << comment
+#       @@others_comments[index] = comments_array
+#   else
+#       comment = Array.new
+#       comment[0] = session[:tester]
+#       comment[1] = params[:thought]
+#       comments_array = @@others_comments[index]
+#       comments_array << comment
+#   end
+#   redirect to('/lobby'), 307
+# end
+
+# get "/answer_ask" do
+#   uuid = params[:uuid]
+#   session[:uuid] = uuid
+#   asking = @@asking_queue[uuid]
+
+#   @asker = asking[:asker]
+#   @question = asking[:question]
+#   @chosen = asking[:chosen]
+#   @not_chosen = asking[:not_chosen]
+
+#   @current_tester = asking[:receiver]
+
+#   session[:uuid] = uuid
+#   session[:tester] = @current_tester
+#   erb :answer_ask
+# end
+
+# post "/reply_ask" do
+#   uuid = session[:uuid]
+#   session[:uuid] = nil
+
+#   @@asking_queue[uuid][:receiver_thought] = params[:thought]
+#   @@asking_queue[uuid][:time_of_replying] = Time.now
+
+#   record_index = @@asking_queue[uuid][:recordID].to_i
+#   if @@record_comments[record_index] == nil
+#       comment_array = Array.new
+#       comment_array << params[:thought]
+#       @@record_comments[record_index] = comment_array
+#   else
+#       comment_array = @@record_comments[record_index]
+#       comment_array << params[:thought]
+#   end
+
+#   redirect to('/lobby'), 307
+# end
+
+# post "/reply_share" do
+#   name = params[:name]
+#   uuid = session[:uuid]
+#   session[:uuid] = nil
+
+#   @@sharing_queue[uuid][:answer] = name
+#   @@sharing_queue[uuid][:receiver_thought] = params[:thought]
+#   @@sharing_queue[uuid][:time_of_replying] = Time.now
+
+
+#   uri = Addressable::URI.parse(URL + "/sharing_history")
+#   uri.query_values = {
+#     'tester'  => @@sharing_queue[uuid][:asker]
+#   }
+
+#   puts uri.to_s
+#   # link = URL + "/sharing_history?tester=" + 
+#   message = "%s replied your question! Go to Check sharing! to see it! %s" % [@@sharing_queue[uuid][:receiver], uri.to_s]
+
+#   @@client.account.messages.create(
+#     :from => '+17183955452',
+#     :to => @@phone_number[@@sharing_queue[uuid][:asker]],
+#     :body => message
+#   )
+
+#   redirect to('/start'), 307
+# end
+
+# get "/sharing_history" do 
+#   session[:tester] = params[:tester] if params[:tester]
+    
+#   tmp = @@sharing_queue.select do |uuid, share| 
+#     (share[:asker] == session[:tester])
+#   end
+
+#   if tmp
+#     @sharings = tmp.values
+#   else
+#     @sharings = Array.new
+#   end
+
+#   erb :sharing_history
+# end
+
