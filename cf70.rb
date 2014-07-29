@@ -37,21 +37,14 @@ def set_interval(delay, name)
 end
 
 def import_questions
-  # @@questions = ["question 1", "question 2", "question 3", "question 4"]
   
-  # @@questions = Array.new
-  # CSV.foreach("questions.csv") do |row|
-  #   @@questions << row[0]
-  # end
-  
-  # question => {categ:xx, dim:xxx, attribute:xxx, value:xx}
   @@categories = Hash.new
   @@questions = Array.new
   
   CSV.foreach("questions.csv") do |row|
-    # question, value, categ, dim, attribute
+    # question, value, categ, dim, att
     @@questions << row[0]
-    @@categories[row[0]] = {"value"=>row[1].to_i, "categ"=>row[2]}
+    @@categories[row[0]] = {"value"=>row[1].to_i, "categ"=>row[2], "dim"=>row[3], "att"=>row[4]}
   end
 
   @@questions.shuffle!
@@ -61,6 +54,18 @@ def import_questions
   #     csv << i
   #   end
   # end
+end
+
+# run after import_questions
+def extract_categ
+  categories = @@categories.values.map{|hash| hash["categ"]}.uniq
+  categories.each do |categ|
+    CATEGORIES[categ] = Array.new
+    dims = @@categories.values.select{|hash| hash["categ"] == categ}.map{|hash| hash["dim"]}.uniq
+    dims.each do |dim|
+        CATEGORIES[categ] << dim
+    end                              
+  end
 end
 
 def import_names
@@ -182,6 +187,9 @@ configure do
   configure_Twilio
   initilize_variables
   initialize_independent_urls
+
+  CATEGORIES = Hash.new
+  extract_categ
   
 end
 
@@ -463,10 +471,10 @@ def normalize_score scores
   res = Hash.new
   multiplier = 0.0333333
   scores.each{|key, value| 
-    if key == "time"
-      res[key] = value
-    else
+    if ["S", "R", "P"].include? key
       res[key] = Math.atan(multiplier * value.to_f)/(Math::PI) + 0.5
+    else
+      res[key] = value
     end
   }
   return res
@@ -519,7 +527,9 @@ route :get, :post, '/view_my_report' do
     @@spiderweb_buffer[@name]["new"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
   end
 
-  @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now}
+  @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now,
+             "detail" => {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
+            }
 
   # first flatten the parcels to an array of quizes only 
   relevants = @@librarian.get_relevant_quizzes(@name)
@@ -527,27 +537,37 @@ route :get, :post, '/view_my_report' do
   # relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
   #              select{|quiz| (quiz["option0"] == @name) or (quiz["option1"] == @name)}
   
+  
+  CATEGORIES.each do |categ, dims|
+    dims.each do |dim|
+        @scores["detail"][categ][dim] = 0.0
+    end                              
+  end
+
   relevants.each do |quiz|
     value     = @@categories[quiz["question"]]["value"]
     category  = @@categories[quiz["question"]]["categ"]
-	
-    # dim       = @@categories[quiz[:question]][:dim]
-    # attribute = @@categories[quiz[:question]][:attribute]
+    dim       = @@categories[quiz["question"]]["dim"]
+    # att       = @@categories[quiz["question"]]["att"]
 
     another_option = (quiz["option1"] == @name) ? quiz["option0"] : quiz["option1"]
-    if quiz["answer"] == @name
+    if quiz["answer"] == @name      
       @scores[category] += value
+      @scores["detail"][category][dim] += value  
+
     elsif quiz["answer"] == another_option
       @scores[category] -= value
+      @scores["detail"][category][dim] -= value
+      
     end
   end
   
   puts "score before"
-  puts @scores
+  puts @scores.inspect
   @scores = normalize_score @scores
   
   puts "score after"
-  puts @scores
+  puts @scores.inspect
 
   time_diff_w_old = @scores["time"] - @@spiderweb_buffer[@name]["old"]["time"]
   time_diff_w_new = @scores["time"] - @@spiderweb_buffer[@name]["new"]["time"]
