@@ -171,6 +171,8 @@ def initilize_variables
   end
 end
 
+
+
 configure do
   puts "Configuring..."
   URL = "http://%s:%s" % [IP, PORT.to_s]
@@ -220,6 +222,27 @@ def clear_session
 end
 
 
+def add_new_player
+  @@names.each do |name|
+    if @@coins[name] == nil then @@coins[name] = 0 end
+    if @@level[name] == nil then @@level[name] = 1 end
+    if @@energy_left[name] == nil then @@energy_left[name] = ENERGY_CAPACITY end
+    if @@progress[name] == nil then @@progress[name] = 0 end
+    if @@gems[name] == nil then @@gems[name] = 0 end
+    if @@wins[name] == nil then @@wins[name] = 0 end
+    if @@losses[name] == nil then @@losses[name] = 0 end
+    if @@view_report[name] == nil then @@view_report[name] = Array.new end
+    if @@play_others[name] == nil then @@play_others[name] = Array.new end
+    if @@play_answer[name] == nil then @@play_answer[name] = Array.new end
+    if @@view_rankings[name] == nil then @@view_rankings[name] = Array.new end
+    if @@use_gems[name] == nil then @@use_gems[name] = Array.new end
+    if @@unlock_someone[name] == nil then @@unlock_someone[name] = Array.new end
+    if @@logged_in[name] == nil then @@logged_in[name] = Array.new end
+
+    @@librarian.add_player name
+  end
+end
+
 def render_home
   erb :home
 end
@@ -230,6 +253,9 @@ end
 
 get '/home' do
   puts "name: " + params["name"]
+  
+  @@names << params["name"]
+  add_new_player
   render_home
 end
 
@@ -247,39 +273,39 @@ get '/' do
 end
 
 
-get '/tel' do
-  session[:stage] = "tel"
-  @current_tester = session[:tester]  
+# get '/tel' do
+#   session[:stage] = "tel"
+#   @current_tester = session[:tester]  
  
-  erb :tel
-end
+#   erb :tel
+# end
 
-post '/welcome' do
-  @current_tester = session[:tester]
+# post '/welcome' do
+#   @current_tester = session[:tester]
 
-  if session[:stage] == "tel"
-    session[:stage] = nil
-    if (@@phone_number[@current_tester] == nil) or 
-       (params[:skip] != "yes")
+#   if session[:stage] == "tel"
+#     session[:stage] = nil
+#     if (@@phone_number[@current_tester] == nil) or 
+#        (params[:skip] != "yes")
 
-      phone_number = params[:phone_number]
+#       phone_number = params[:phone_number]
 
-      #@@client.account.messages.create(
-      #  :from => '+17183955452',
-      #  :to => phone_number,
-      #  :body => 'Welcome, %s! Ready to play the game? :-)' % @current_tester
-      #)
+#       #@@client.account.messages.create(
+#       #  :from => '+17183955452',
+#       #  :to => phone_number,
+#       #  :body => 'Welcome, %s! Ready to play the game? :-)' % @current_tester
+#       #)
 
-      @@phone_number[@current_tester] = phone_number  
-    end
-  end
-  if @@started_playing[session[:tester]] == nil
-     set_interval(REFILL, session[:tester])
-     @@started_playing[session[:tester]] = TRUE
-  end
-  @@logged_in[session[:tester]] << Time.now
-  redirect to('/home'), 307
-end
+#       @@phone_number[@current_tester] = phone_number  
+#     end
+#   end
+#   if @@started_playing[session[:tester]] == nil
+#      set_interval(REFILL, session[:tester])
+#      @@started_playing[session[:tester]] = TRUE
+#   end
+#   @@logged_in[session[:tester]] << Time.now
+#   redirect to('/home'), 307
+# end
 
 post '/choose_people' do
   @@play_answer[session[:tester]] << Time.now
