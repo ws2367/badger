@@ -204,9 +204,7 @@ def render_lobby
   erb :lobby
 end
 =end
-def render_home
-  erb :home
-end
+
 
 def clear_session
     session[:choose] = nil
@@ -221,24 +219,31 @@ def clear_session
     session[:skippedquestions] = nil
 end
 
+
+def render_home
+  erb :home
+end
+
 post '/home' do
   render_home
 end
 
 get '/home' do
+  puts "name: " + params["name"]
   render_home
 end
 
 get '/' do
+  erb :login
   # Who are you?
   #erb :home
-  if params[:id]
-     id = params[:id]
-     session[:tester] = @@independent_ids[id]
-  end 
-  puts "name: "+session[:tester]
-  clear_session
-  redirect to('/tel'), 307
+  # if params[:id]
+  #    id = params[:id]
+  #    session[:tester] = @@independent_ids[id]
+  # end 
+  # puts "name: "+session[:tester]
+  # clear_session
+  # redirect to('/tel'), 307
 end
 
 
