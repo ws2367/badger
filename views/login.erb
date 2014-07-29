@@ -1,8 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Facebook Login JavaScript Example</title>
-<meta charset="UTF-8">
+  <title>CF Login</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <!-- Bootstrap core CSS -->
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+  <style>
+  .gradient-color {
+    background: #ffd2c1; /* Old browsers */
+    background: -moz-linear-gradient(-45deg, #ffd2c1 0%, #f77b67 50%, #ffe2c9 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,#ffd2c1), color-stop(50%,#f77b67), color-stop(100%,#ffe2c9)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(-45deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(-45deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(-45deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* IE10+ */
+    background: linear-gradient(135deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffd2c1', endColorstr='#ffe2c9',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  }
+  </style>
 </head>
 <body>
 <script>
@@ -19,13 +39,11 @@
       testAPI();
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
-      document.getElementById('status').innerHTML = 'Please log ' +
-        'into this app.';
+      
     } else {
       // The person is not logged into Facebook, so we're not sure if
       // they are logged into this app or not.
-      document.getElementById('status').innerHTML = 'Please log ' +
-        'into Facebook.';
+      
     }
   }
 
@@ -82,7 +100,7 @@
       console.log('Successful login for: ' + response.name);
       document.getElementById('status').innerHTML =
         'Thanks for logging in, ' + response.name + '!';
-        window.location.href = "/home?name=" + response.name;
+      window.location.href = "/home?name=" + response.name;
     });
   }
 </script>
@@ -92,12 +110,28 @@
   the JavaScript SDK to present a graphical Login button that triggers
   the FB.login() function when clicked.
 -->
+<div class="jumbotron gradient-color">
+  <font color="white">
+  <center>
+  <h1>Yours</h1>
+  <br>
+  <br>
+  
+  <div class="fb-login-button" data-max-rows="10" data-size="xlarge" data-show-faces="true" data-auto-logout-link="false" scope="public_profile,email" onlogin="checkLoginState();"></div>
 
-<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-</fb:login-button>
-
-<div id="status">
+  <div id="status">
+  </div>
+  </center>  
+  </font>
 </div>
 
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>    
 </body>
 </html>
