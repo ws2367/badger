@@ -27,7 +27,7 @@ class Librarian
 
   def initialize_for_a_player name
     @bundles[name] = Array.new if @bundles[name] == nil
-    @bundles_played[name] = Array.new if @bundles_played == nil
+    @bundles_played[name] = Array.new if @bundles_played[name] == nil
   end
 
   def add_player name

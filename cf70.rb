@@ -253,14 +253,25 @@ end
 
 get '/home' do
   puts "name: " + params["name"]
-  
+
   @@names << params["name"]
   add_new_player
+
+  session[:tester] = params["name"]
+  if @@started_playing[session[:tester]] == nil
+    set_interval(REFILL, session[:tester])
+    @@started_playing[session[:tester]] = TRUE
+  end
+  @@logged_in[session[:tester]] << Time.now
   render_home
 end
 
 get '/' do
-  erb :login
+  if params[:id] == nil
+    erb :login
+  else
+    erb :tel
+  end
   # Who are you?
   #erb :home
   # if params[:id]
@@ -273,39 +284,39 @@ get '/' do
 end
 
 
-# get '/tel' do
-#   session[:stage] = "tel"
-#   @current_tester = session[:tester]  
+get '/tel' do
+  session[:stage] = "tel"
+  @current_tester = session[:tester]  
  
-#   erb :tel
-# end
+  erb :tel
+end
 
-# post '/welcome' do
-#   @current_tester = session[:tester]
+post '/welcome' do
+  @current_tester = session[:tester]
 
-#   if session[:stage] == "tel"
-#     session[:stage] = nil
-#     if (@@phone_number[@current_tester] == nil) or 
-#        (params[:skip] != "yes")
+  if session[:stage] == "tel"
+    session[:stage] = nil
+    if (@@phone_number[@current_tester] == nil) or 
+       (params[:skip] != "yes")
 
-#       phone_number = params[:phone_number]
+      phone_number = params[:phone_number]
 
-#       #@@client.account.messages.create(
-#       #  :from => '+17183955452',
-#       #  :to => phone_number,
-#       #  :body => 'Welcome, %s! Ready to play the game? :-)' % @current_tester
-#       #)
+      #@@client.account.messages.create(
+      #  :from => '+17183955452',
+      #  :to => phone_number,
+      #  :body => 'Welcome, %s! Ready to play the game? :-)' % @current_tester
+      #)
 
-#       @@phone_number[@current_tester] = phone_number  
-#     end
-#   end
-#   if @@started_playing[session[:tester]] == nil
-#      set_interval(REFILL, session[:tester])
-#      @@started_playing[session[:tester]] = TRUE
-#   end
-#   @@logged_in[session[:tester]] << Time.now
-#   redirect to('/home'), 307
-# end
+      @@phone_number[@current_tester] = phone_number  
+    end
+  end
+  if @@started_playing[session[:tester]] == nil
+     set_interval(REFILL, session[:tester])
+     @@started_playing[session[:tester]] = TRUE
+  end
+  @@logged_in[session[:tester]] << Time.now
+  redirect to('/home'), 307
+end
 
 post '/choose_people' do
   @@play_answer[session[:tester]] << Time.now
