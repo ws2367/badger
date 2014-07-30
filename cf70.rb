@@ -258,7 +258,8 @@ end
 route :get, :post, '/home' do
   if params["name"]
     puts "name: " + params["name"]
-    @@names << params["name"]
+    @@names << params["name"] unless @@names.include? params["name"]
+    
     add_new_player
 
     session[:tester] = params["name"]
@@ -386,20 +387,24 @@ post '/choose_answer' do
     session[:question] = params[:question]
   end
 
-  if params[:betting]
-    puts "betting"
-    puts params[:betting]
-    @@coins[session[:tester]] -= params[:betting].to_i
-  end
+  # if params[:betting]
+  #   puts "betting"
+  #   puts params[:betting]
+    
+  # end
 
   prng = Random.new
-  if params[:answer]
+  if params[:answer] and params[:betting]
      quiz = Hash.new
      quiz["question"] = session[:question]
      quiz["option0"] = session[:option0]
      quiz["option1"] = session[:option1]
      quiz["answer"] = params[:answer]
      quiz["time"] = Time.now
+
+     @@coins[session[:tester]] -= params[:betting].to_i
+     quiz["bet"] = params[:betting].to_i
+     quiz["done"] = false
      session[:bundle] << quiz
   end
 
