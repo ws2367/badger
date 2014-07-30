@@ -90,7 +90,7 @@ end
 def initialize_record
 
   @@tester_progress = Array.new(@@names.count, -1)
-  # @@phone_number = Hash.new
+  @@phone_number = Hash.new
   # @@sharing_queue = Hash.new
 
   #Iru
@@ -293,12 +293,12 @@ get '/' do
 end
 
 
-get '/tel' do
-  session[:stage] = "tel"
-  @current_tester = session[:tester]  
+# get '/tel' do
+#   session[:stage] = "tel"
+#   @current_tester = session[:tester]  
  
-  erb :tel
-end
+#   erb :tel
+# end
 
 # post '/welcome' do
 #   @current_tester = session[:tester]
@@ -603,6 +603,8 @@ route :get, :post, '/view_my_report' do
   @newS = @@spiderweb_buffer[@name]["new"]["S"]
 
   @contributors = collect_contributors(@name)
+
+  @guesser_questions = @@librarian.get_guesser_questions(@name)
   erb :my_report
 end
 
@@ -661,7 +663,7 @@ post '/result' do
   if @win >= 2
     @correct = true
     @@wins[session[:tester]] += 1
-    @@librarian.record_win(session[:tester], session[:uuid], session[:correct_history])
+    @@librarian.record_win(session[:tester], session[:bundle], session[:guesswhom], session[:correct_history])
   else
     @correct = false
     @@losses[session[:tester]] += 1
@@ -795,6 +797,14 @@ post '/next' do
   else   
     erb :question
   end
+end
+
+post "/unlockGuesser" do
+  puts params[:uuid]
+  @@coins[session[:tester]] = @@coins[session[:tester]] - 300
+  @@librarian.unlock_guesser(session[:tester], params[:uuid])
+  status 200
+  body ''
 end
 
 

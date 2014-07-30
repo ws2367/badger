@@ -74,6 +74,47 @@
        }
        myXHR.send();
     }
+
+    // Unlock guesser
+    priceOfUnlockGuesser = 300;
+    function UnlockGuesserBtn(btnParentId, btnId, uuid, coinId, author){
+       this.btnParent = document.getElementById(btnParentId);
+       this.btn = document.getElementById(btnId);
+       this.coinLabel = document.getElementById(coinId);
+       this.uuid = uuid;
+       this.author = author;
+       var obj = this;
+       this.btn.onclick = function(){obj.btnClicked();}    
+    }
+
+    UnlockGuesserBtn.prototype.btnClicked = function(){
+       var obj = this;
+       var coinsNum = parseInt(obj.coinLabel.innerHTML);
+       console.log(obj.coinLabel.innerHTML)
+       console.log(coinsNum)
+       if(coinsNum < priceOfUnlockGuesser){
+           window.alert("sorry, not enough coins...");
+           return;
+       }
+       obj.coinLabel.innerHTML = (coinsNum - priceOfUnlockGuesser).toString();
+       obj.btnParent.removeChild(obj.btn);
+       var authorTextNode = document.createTextNode(obj.author);
+       obj.btnParent.appendChild(authorTextNode);
+       //send request
+       var myXHR = new XMLHttpRequest();
+       myXHR.open("POST", "/unlockGuesser" + "?uuid=" + obj.uuid);
+       myXHR.onreadystatechange = function() {
+           if (this.readyState != 4) {
+              return;
+           }
+           if (this.status == 200) {
+              return;
+           } else {
+             console.log("error occurred!");
+           }
+       }
+       myXHR.send();
+    }
     //]]>
     </script>
 
@@ -88,12 +129,22 @@
 <!-- NAVBAR
 ================================================== -->
   <body>
-   <div class="container marketing" style="background-color: #66CCFF;">
+  <div class="container marketing" style="background-color: #66CCFF;">
     <div class="row">
-        <div class="col-xs-12 col-sm-12"><center><h1><font color="white">My Report</font></h1></div>
-      </div>
- </div>
-</br>
+      <div class="col-xs-12 col-sm-12"><center><h1><font color="white">My Report</font></h1></div>
+    </div>
+  </div>
+
+  <!-- Nav tabs -->
+<ul class="nav nav-tabs" role="tablist">
+  <li class="active"><a href="#spiderweb" role="tab" data-toggle="tab">SpiderWeb</a></li>
+  <li><a href="#author" role="tab" data-toggle="tab">Author</a></li>
+  <li><a href="#guesser" role="tab" data-toggle="tab">Guesser</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div class="tab-pane" id="spiderweb">
     <div id="body">
     <div id="chart" ></div>
     </div>
@@ -205,35 +256,25 @@ var legend = svg.append("g")
     ; 
         //]]>
     </script>
+  </div>
+  <div class="tab-pane" id="author">
+    
     <!-- Marketing messaging and featurettes
     ================================================== -->
     <!-- Wrap the rest of the page in another container to center all the content. -->
 
 
-    <div class="col-xs-12 col-sm-12"  style="background-color: #66CCFF;" ><center><font color="white" size="3pt">Spend <img src="/img/coin.jpg" width="17" height="17"> 300 to unlock an author</font></center></div>
-
-        <div class="col-xs-12 col-sm-12" style="background-color: #66CCFF;"> <center> 
-          <img src="/img/coin.jpg" width="22" height="22">
-      <font color="white"><div id="coinId"><%= @@coins[session[:tester]] %></div></font>
-</center>
-      </div>
-
-<!--    <div style="background-color: #66CCFF;">
-      <div class="row">
-        <div class="col-xs-12 col-sm-12"><center><font color="white" size="3pt">Spend <img src="/img/coin.jpg" width="17" height="17"> 300 to unlock an author</font></center></p></div>
-      </div> 
+    <div class="col-xs-12 col-sm-12"  style="background-color: #66CCFF;" >
+      <center><font color="white" size="3pt">Spend <img src="/img/coin.jpg" width="17" height="17"> 300 to unlock an author</font></center>
     </div>
-</div>-->
-   <!--   <div class="row">
-        <div class="col-xs-4 col-sm-2"></div>
-        <div class="col-xs-1 col-sm-1">  
-          <img src="/img/coin.jpg" width="22" height="22">
-        </div>
-      <font color="white"><div id="coinId" class="col-xs-1 col-sm-1"><%= @@coins[session[:tester]] %></div></font>
-      </div>-->
+
+    <div class="col-xs-12 col-sm-12" style="background-color: #66CCFF;">
+      <center> 
+        <img src="/img/coin.jpg" width="22" height="22">
+        <font color="white"><div id="coinId"><%= @@coins[session[:tester]] %></div></font>
+      </center>
+    </div>
 </br>
-
-
 
 <div class="container-marketing">
 
@@ -300,20 +341,90 @@ var legend = svg.append("g")
     </div>
     <br>
   <%end%>
+  </div>
+</div>
+  <div class="tab-pane" id="guesser">
+    <div class="container-marketing">
+      
+      <%@guesser_questions.each do |question|%>
+        <%quiz  = question["quiz"]%>
+        <%found = @@librarian.is_guesser_unlocked?(session[:tester], quiz["uuid"])%>
+
+        <div class="container my-container">
+          <font color="orange" size="5pt">
+            <span class="glyphicon glyphicon-user"></span>
+            <%if found%>
+               <%=question["guesser"]%>
+            <%else%>
+               <%divID = "authorDiv" + quiz["uuid"]%>
+               <%btnID = "authorBtn" + quiz["uuid"]%>
+               <div class="inline_form" id=<%=divID%> >
+                        <button id=<%=btnID%> class="btn btn-warning">Unlock</button>
+               </div>
+               <script type="text/JavaScript">
+                     //<![CDATA[
+                        console.log("here")
+                        //btnParentId, btnId, uuid, coinId, author
+                        new UnlockGuesserBtn("<%=divID%>", "<%=btnID%>", "<%=quiz['uuid']%>","coinId", "<%=question['guesser']%>"); 
+                     //]]>
+               </script>
+            <%end%>
+          </font>
+          <div class="row">
+            <div class="col-xs-12 col-sm-8"><center><%=quiz["question"]%></center></div>
+          </div>
+          <div class="row">
+            <div class="col-xs-6 col-sm-4">
+              <center>
+              <%if quiz["option0"] == quiz["answer"]%>
+                 <span class="glyphicon glyphicon-ok"></span>
+                 <font>
+              <%else%>
+                 <font color="#CCCCCC">
+              <%end%>
+              <%if quiz["option0"] == session[:tester]%>
+                 You
+              <%else%>
+                 <%=quiz["option0"]%>
+              <%end%>
+              </font>
+              </center>
+            </div>
+            <div class="col-xs-6 col-sm-4">
+              <center>
+              <%if quiz["option1"] == quiz["answer"]%>
+                 <span class="glyphicon glyphicon-ok"></span>
+                 <font>
+              <%else%>
+                 <font color="#CCCCCC">
+              <%end%>
+              <%if quiz["option1"] == session[:tester]%>
+                 You
+              <%else%>
+                 <%=quiz["option1"]%>
+              <%end%>
+              </font>
+              </center>
+            </div>
+          </div>
+        </div>
+        <br>
+      <%end%>
+
+    </div>
+  </div>
 
 
-      </br></br></br></br>
-      <form class="form-horizontal" role="form" action="home" method="post">
-    <center><button type="submit" class="btn btn-success btn-block">OK</button></center>
-  </form>
+</br>
+    <form class="form-horizontal" role="form" action="home" method="post">
+      <center><button type="submit" class="btn btn-success btn-block">OK</button></center>
+    </form>
 
       <!-- FOOTER -->
       <footer>
         </br></br></br></br></br>
         <p>&copy; 2014 Orrzs Inc.</p>
       </footer>
-
-    
 
 
     <!-- Bootstrap core JavaScript
