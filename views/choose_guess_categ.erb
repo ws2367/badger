@@ -48,6 +48,13 @@
       max-width: 653px;
       min-height: 400px;
     }
+
+    #pbtn, #rbtn, #sbtn, #fbtn{
+      min-height: 60px;
+      font-size: 15pt;
+      /*background-color: #000000;*/
+      color: #FFFFFF;
+    }
     </style>
 
   </head>
@@ -82,26 +89,22 @@
  <div class="row">
     <div id="red_background" class="col-xs-11 col-md-7">
 
-
-            <b><center><font size="5pt">Comparing...</font></center></b>
+</br>
+            <b><center><font size="5pt">Select a category:</font></center></b>
           </br>
-            <center><font size="5pt"><div id="option0"><%=@initial_first%></div></font></center>
-            <center><font size="3pt" color="gray">vs</font></center>
-            <center><font size="5pt"><div id="option1"><%=@initial_second%></div></font></center>
-          </br>
-            <center><button id="shufflebtn" type="button" class="btn btn-warning"><span class="glyphicon glyphicon-random"></span>      <img src="/img/coin.png" alt="Smiley face" width="22" height="22">30</button>    
-              <div id="timesleftbig"><div id="timesleft">3</div> times left</div>
-            </center>
-            
-              </br></br></br></br>
-              <form id="people_form" class="form-horizontal" role="form" action="choose_answer" method="post">
-                  <input type="hidden" name="option0" value=""> 
-                  <input type="hidden" name="option1" value=""> 
+          <form id="people_form" class="form-horizontal" role="form" action="choose_guess_people" method="post">
 
-            <center><button type="submit" class="btn btn-info btn-block">Next <span class="glyphicon glyphicon-chevron-right"></span></button></center>
+            <center><button type="submit" id="pbtn" class="btn btn-primary btn-block" name="categ" value="P">Professional</button></center>
+            <center><button type="submit" id="rbtn" class="btn btn-primary btn-block" name="categ" value="R">Relationship</button></center>
+            <center><button type="submit" id="sbtn" class="btn btn-primary btn-block" name="categ" value="S">Social</button></center>
+            <center><button type="submit" id="fbtn" class="btn btn-primary btn-block" name="categ" value="F">Just for fun</button></center>
+
           </form>
-      </div>
-  </div>
+
+
+
+    </div>
+</div>
 
 
 

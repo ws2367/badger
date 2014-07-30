@@ -17,6 +17,9 @@ REFILL = 480
 ENERGY_CAPACITY = 5
 TIME_DIFFERENCE_UPPER_BOUND = 8 * 60 * 60 # secs
 TIME_DIFFERENCE_LOWER_BOUND = 5 * 60 # secs
+INITIAL_COINS = 0
+PLAY_MAX_BET = 200
+GUESS_MAX_BET = 200
 
 set :bind, '0.0.0.0'
 set :port, PORT
@@ -158,7 +161,7 @@ end
 
 def initilize_variables
   @@names.each do |name|
-    @@coins[name] = 0
+    @@coins[name] = INITIAL_COINS
     @@level[name] = 1
     @@energy_left[name] = ENERGY_CAPACITY
     @@progress[name] = 0
@@ -226,12 +229,13 @@ def clear_session
     session[:correct_history] = nil
     session[:xp_to_add] = nil
     session[:skippedquestions] = nil
+    session[:bettingleft] = nil
 end
 
 
 def add_new_player
   @@names.each do |name|
-    if @@coins[name] == nil then @@coins[name] = 0 end
+    if @@coins[name] == nil then @@coins[name] = INITIAL_COINS end
     if @@level[name] == nil then @@level[name] = 1 end
     if @@energy_left[name] == nil then @@energy_left[name] = ENERGY_CAPACITY end
     if @@progress[name] == nil then @@progress[name] = 0 end
@@ -250,29 +254,21 @@ def add_new_player
   end
 end
 
-def render_home
-  erb :home
-end
 
-post '/home' do
-  render_home
-end
+route :get, :post, '/home' do
+  if params["name"]
+    puts "name: " + params["name"]
+    @@names << params["name"]
+    add_new_player
 
-get '/home' do
-  puts "name: " + params["name"]
-  
-
-  @@names << params["name"]
-  add_new_player
-
-  clear_session
-  session[:tester] = params["name"]
+    session[:tester] = params["name"]
+  end
   if @@started_playing[session[:tester]] == nil
     set_interval(REFILL, session[:tester])
     @@started_playing[session[:tester]] = TRUE
   end
   @@logged_in[session[:tester]] << Time.now
-  render_home
+  erb :home
 end
 
 get '/' do
@@ -293,12 +289,27 @@ get '/' do
 end
 
 
-# get '/tel' do
-#   session[:stage] = "tel"
-#   @current_tester = session[:tester]  
- 
-#   erb :tel
-# end
+get '/tel' do
+  session[:stage] = "tel"
+
+  ##hacking to play
+  puts params[:num] 
+  if params[:num] == "1"
+    session[:tester] = "Iru Wang"
+  elsif params[:num] == "2"
+    session[:tester] = "Chiu-Ho Lin"
+  else
+    session[:tester] = "Wen Shaw"
+  end
+  @@names << "Iru Wang"
+  @@names << "Chiu-Ho Lin"
+  @@names << "Wen Shaw"
+  add_new_player
+  ###end hack
+
+  @current_tester = session[:tester]  
+  erb :tel
+end
 
 # post '/welcome' do
 #   @current_tester = session[:tester]
@@ -321,7 +332,12 @@ end
 #   redirect to('/home'), 307
 # end
 
+post '/choose_categ' do
+  erb :choose_categ
+end
+
 post '/choose_people' do
+  session[:categ] = params[:categ]
   @@play_answer[session[:tester]] << Time.now
 
   if @@energy_left[session[:tester]] > 0
@@ -356,7 +372,6 @@ post '/choose_answer' do
 
   if session[:choose] == nil
     session[:choose] = 1
-    
     session[:bundle] = Array.new
   else
     session[:choose] = session[:choose] + 1
@@ -370,6 +385,13 @@ post '/choose_answer' do
   if params[:question]
     session[:question] = params[:question]
   end
+
+  if params[:betting]
+    puts "betting"
+    puts params[:betting]
+    @@coins[session[:tester]] -= params[:betting].to_i
+  end
+
   prng = Random.new
   if params[:answer]
      quiz = Hash.new
@@ -393,6 +415,7 @@ post '/choose_answer' do
     question = @@questions[prng.rand(@@questions.count)]
   end
   session[:question] = question
+  session[:bettingleft] = (@@coins[session[:tester]] < PLAY_MAX_BET)? @@coins[session[:tester]] : PLAY_MAX_BET
   erb :choose_answer
 end
 
@@ -432,18 +455,16 @@ end
 post '/choose_ending' do
   @@coins[session[:tester]] = @@coins[session[:tester]] + 100
 
-  addupXP(100, session[:tester])
+  # addupXP(100, session[:tester])
 
   erb :choose_ending
 end
 
 post '/finish_choose' do
-  if session[:xp_to_add]
-    redirect to('/level_up'), 307
-  end
+  # if session[:xp_to_add]
+  #   redirect to('/level_up'), 307
+  # end
   redirect to('/home'), 307
-  #redirect to('/view_my_report'), 307
-  #erb :level_up
 end
 
 post '/level_up' do
@@ -608,10 +629,19 @@ route :get, :post, '/view_my_report' do
   erb :my_report
 end
 
+post '/choose_guess_categ' do
+  erb :choose_guess_categ
+end
+
+post '/choose_guess_people' do
+  erb :choose_guess_people
+end
+
 post '/play' do
   @@play_others[session[:tester]] << Time.now
 
   if session[:round] == nil
+    @@coins[session[:tester]] -= 50
     session[:round] = 1
     session[:correct_history] = Array.new
   else
@@ -628,6 +658,13 @@ post '/play' do
   # in the middle of guessing
   if params[:correct]
     session[:correct_history] << params[:correct]
+    if params[:betting]
+        if params[:correct] == "true"
+          @@coins[session[:tester]] += params[:betting].to_i
+        else
+          @@coins[session[:tester]] -= params[:betting].to_i
+        end
+    end
   end
 
   if session[:round] == 4
@@ -637,6 +674,7 @@ post '/play' do
   @option0 = session[:bundle][session[:round]-1]["option0"]
   @option1 = session[:bundle][session[:round]-1]["option1"]
   @answer = session[:bundle][session[:round]-1]["answer"]
+  session[:bettingleft] = (@@coins[session[:tester]] < GUESS_MAX_BET)? @@coins[session[:tester]] : GUESS_MAX_BET
   erb :play
 end
 

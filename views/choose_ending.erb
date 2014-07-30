@@ -18,6 +18,23 @@
     <link rel="stylesheet" type="text/css" href="css/homepage.css">
 
   </head>
+  <style>
+  #red_background{
+      background: #FCE2A8;
+      border-radius: 5px;
+      height: 100px;
+      margin-top: 7px;
+      margin-left: 7px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 0px;
+      padding-right: 0px;
+      font-size: 12pt;
+      min-width: 306px;
+      max-width: 653px;
+      min-height: 400px;
+    }
+  </style>
 <!-- NAVBAR
 ================================================== -->
   <body>
@@ -29,37 +46,38 @@
 
     <div class="container marketing">
 
-  <div class="row">
-    <div id="player_name" class="col-xs-5 col-sm-3"><center>
-        <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
-      </center>
-    </div>
-    <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
-    <!-- Optional: clear the XS cols if their content doesn't match in height -->
-    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><%=@@gems[session[:tester]]%></div>
-    </center>
-    </div>
-  </div>
-  <!-- <h1>Records</h1> -->
-</br>
-</br>
 
 
-    <b><center><font size="5pt">Congratulations! You have earned:</font></center></b>
-  </br>
-    <center><font size="4pt"> <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> <font size="3pt"><span class="glyphicon glyphicon-remove"></font> 100</font></center>
-  </br>
     <div class="row">
-      <div class="col-xs-3 col-sm-4">Level <%=@@level[session[:tester]]%></div>
-      <div class="col-xs-8 col-sm-6"> 
-        <div class="progress">
-          <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
-           <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
-          </div>
-        </div> 
-      </div> 
+      <div id="player_name" class="col-xs-5 col-sm-3"><center>
+          <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
+        </center>
+      </div>
+      <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
+      <!-- Optional: clear the XS cols if their content doesn't match in height -->
+      <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><%=@@gems[session[:tester]]%></center></div>
     </div>
-  </br>
+    <!-- <h1>Records</h1> -->
+
+
+ <div class="row">
+    <div id="red_background" class="col-xs-11 col-md-7">
+
+              <b><center><font size="5pt">Congratulations!</br> You have earned</font></center></b>
+            </br>
+              <center><font size="4pt"> <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> <font size="3pt"><span class="glyphicon glyphicon-remove"></font> 100</font></center>
+            </br>
+                <!-- <div class="col-xs-4 col-sm-5"><center>Level <%=@@level[session[:tester]]%></center></div>
+                <div class="col-xs-8 col-sm-6"> 
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-info active"  role="progressbar" aria-valuenow="<%=@@progress[session[:tester]]%>" aria-valuemin="0" aria-valuemax="100" style="width: <%=@@progress[session[:tester]]%>%">
+                     <span class="sr-only"><%=@@progress[session[:tester]]%>% Complete</span>
+                    </div>
+                  </div> 
+                </div>  -->
+            </br>
+
+
 
 
       </br></br></br></br>
@@ -67,13 +85,8 @@
     <center><button type="submit" class="btn btn-success btn-block">OK</button></center>
   </form>
 
-      <!-- FOOTER -->
-      <footer>
-        </br></br></br></br></br></br>
-        <p>&copy; 2014 Orrzs Inc.</p>
-      </footer>
-
-    </div><!-- /.container -->
+        </div>
+  </div>
 
 
     <!-- Bootstrap core JavaScript

@@ -15,6 +15,7 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/homepage.css">
 
     <style>
     .coins_font{
@@ -33,6 +34,48 @@
       #buffer {
           min-height: 30px;
       }
+      #red_background{
+      background: #cdf8de;
+      border-radius: 5px;
+      height: 100px;
+      margin-top: 7px;
+      margin-left: 7px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 0px;
+      padding-right: 0px;
+      font-size: 12pt;
+      min-width: 306px;
+      max-width: 653px;
+      min-height: 400px;
+    }
+
+    #whoquestion{
+      padding-left: 5px;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+        /*-webkit-appearance: none;*/
+        width: 33px;
+        height: 33px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-gradient(
+            linear,
+            left top,
+            left bottom,
+            color-stop(0, #fefefe),
+            color-stop(0.49, #dddddd),
+            color-stop(0.51, #d1d1d1),
+            color-stop(1, #a1a1a1)
+        );
+        background-repeat: no-repeat;
+        background-position: 50%;
+    }
+
+    #bettingleftid{
+      display: inline-block;
+    }
     </style>
 
      <script type="text/JavaScript">
@@ -75,7 +118,7 @@
            var newtxt = document.createElement('span');
            newtxt.style.color = "#FFA500";
            newtxt.style.fontSize="15pt";
-           var txt = "Congratulations! You won!";
+           var txt = "Congrats! You won! Your bet has doubled!";
            newtxt.appendChild(document.createTextNode(txt));
            obj.toPutText.appendChild(newtxt);
            if (optionNum == 0){
@@ -123,11 +166,26 @@
     <!-- Marketing messaging and featurettes
     ================================================== -->
     <!-- Wrap the rest of the page in another container to center all the content. -->
-</br>
-    <div class="container">
 
-      <div class="row">
-        <div class="col-xs-3 col-md-2"></div>
+    <div class="container">
+              <div class="row">
+    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+        <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
+      </center>
+    </div>
+    <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
+    <!-- Optional: clear the XS cols if their content doesn't match in height -->
+    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><div id="gemnum"><%=@@gems[session[:tester]]%></div>
+    </center>
+    </div>
+  </div>
+  <!-- <h1>Records</h1> -->
+ <div class="row">
+    <div id="red_background" class="col-xs-11 col-md-7">
+
+                  
+      <center>
+        <div class="col-xs-3 col-md-4"></div>
         <div class="col-xs-2 col-md-1">
           <%if session[:round] == 1%>
              <b><font size="5pt" color="#FFCC33" >1</font></b>
@@ -149,9 +207,10 @@
              <font size="5pt" color="#A8A8A8" >3</font>
           <%end%>
         </div>
-      </div>
-      <div class="row">
-        <div id="buffer" class="col-xs-3 col-md-2"></div>
+            
+      </center>
+</br></br>
+        <div id="buffer" class="col-xs-3 col-md-4"></div>
         <div id="icon1" class="col-xs-2 col-md-1">
           <%if session[:correct_history].count > 0%>
              <%if session[:correct_history][0] == "true"%>
@@ -179,18 +238,19 @@
              <%end%>
           <%end%>
         </div>
-      </div>
-    </br>
-      <p><font size="4pt" >Who do you think <b><%=session[:guesswhom]%></b> chose in this question?</font></p>
-      </br>
+
+    </br></br>
+      <div id="whoquestion"><font size="4pt" >Who do you think <b><%=session[:guesswhom]%></b> chose in this question?</font></div>
+      
         <div class="container my-container">
          <div class="row">
              <div class="col-xs-12 col-sm-12"><center><font size="4pt" color="0000CD"><%=@question%></font></div>
          </div>
-          </br></br></br>
+          </br>
          <div class="row">
            <form id="nextform" role="form" action="play" method="post">   
-           <input type="hidden" name="correct" value="">   
+           <input type="hidden" name="correct" value=""> 
+           <input type="hidden" name="betting" value="">     
            <div class="col-xs-6 col-md-6">
             <p><button id="option0btn" class="btn btn-info btn-lg btn-block" ><%=@option0%></button></p>
            </div>
@@ -198,26 +258,37 @@
               <p><button id="option1btn" class="btn btn-info btn-lg btn-block" ><%=@option1%></button></p>
           </div>
          </div><!-- /.row -->
-       </br>
+
+        <center>
+        <font color="#4169e3" size="3pt">Your bet <img src="/img/chip.png" alt="Smiley face" width="22" height="22"> <span id="range">0</span></font>
+              <input id="rangeid" type="range" min="0" max="<%=session[:bettingleft]%>" value="0" step="10" onchange="showValue(this.value,<%=session[:bettingleft]%>)" />
+        </center>
+      </div>
+
+
         <center><div id="toPutText"></div>
-        </div>
+        
+
+
 
 
       <script type="text/JavaScript">
                  //<![CDATA[
+                    function showValue(newValue, bettingleft)
+                    {
+                      var bettingleft = parseInt(bettingleft);
+                      document.getElementById("range").innerHTML=newValue;
+                      var myform = document.forms["nextform"];
+                      myform.betting.value = newValue;
+                    }
                     new questionObj("option0btn", "option1btn", "<%=@answer%>","nextform","toPutText","<%='icon' + session[:round].to_s%>"); 
                  //]]>
       </script>
     </form>
-<br>
 
-  <br>
-      <!-- FOOTER -->
-      <footer>
-      </br></br></br></br></br></br></br></br>
-    <!--    <p>If you are not <%=session[:tester]%>, please go back to <a href="/">home</a> and choose your name.</p>-->
-        <p>&copy; 2014 Orrzs Inc.</p>
-      </footer>
+
+</div>
+</div>
 
     </div><!-- /.container -->
 

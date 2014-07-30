@@ -90,6 +90,20 @@
             border: 1px dashed rgba(0,0,0,.4);
   }
       }
+
+      #playpanel{
+        background-color: #f8e4e5;
+      }
+      #guesspanel{
+        background-color: #cdf8de;  
+      }
+      #viewpanel{
+        background-color: #caecfa;  
+      }
+      #choose-section{
+        padding-left: 7px;
+        min-width: 316px;
+      }
     </style>
 
   </head>
@@ -129,6 +143,9 @@
            <input type="hidden" name="tester" value="<%=session[:tester]%>"> 
     </form>
     <form id="rankingsform" class="form-horizontal" role="form" action="rankings" method="post">
+    </form>
+    <form id="playform" class="form-horizontal" role="form" action="play" method="post">
+       <input type="hidden" name="uuid" value=""> 
     </form>
 
   <div class="row">
@@ -172,6 +189,25 @@
        var imageText = (("linear-gradient(to left, #FFFFFF ").concat(whitewidth.toString())).concat("%,#f4d1ec 0%)")
        level_display.style.backgroundImage = imageText;
 
+      function guessButton(btnid, uuid, coins){
+        var obj = this;
+        obj.uuid = uuid;
+        obj.btnelement = document.getElementById(btnid);
+        obj.coins = parseInt(coins);
+        obj.btnelement.onclick = function(){obj.btnClicked();}    
+      }
+
+      guessButton.prototype.btnClicked = function(){
+        var obj = this;
+        if(obj.coins < 50){
+          alert("Not enough coins to play GUESS...");
+          return;
+        }
+        var myform = document.forms["playform"];
+        myform.uuid.value = obj.uuid;
+        myform.submit();
+      }
+
         //]]>
     </script>
 
@@ -179,68 +215,54 @@
 </br>
 
       <div class="container marketing">
+<div class="row">
 
-  <div class="col-xs-16 col-sm-7">
+<div id="choose-section" class="col-xs-16 col-sm-7">
   <div class="panel-group" id="accordion">
-  <div class="panel panel-success">
+
+
+  <div id="playpanel" class="panel">
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
 
           <div class="collapsetitle"><center>What do you think about your friends?</center></div>
-          <div class="collapsesub"><center>Earn  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> 100</center></div>
-          <div class="collapsesub"><center>Spend 1 energy to play!</center></div>
+          <div class="collapsesub"><center>Earn  <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 100</center></div>
+          <div class="collapsesub"><center>Spend  <img src="/img/energy.png" alt="Smiley face" width="22" height="22">to play</center></div>
 
         </a>
       </h4>
     </div>
     <div id="collapseOne" class="panel-collapse collapse">
       <div class="panel-body">
-        <form class="form-horizontal" role="form" action="choose_people" method="post">
-              <center><button id="play_btn" type="submit" class="btn btn-success btn-block">Play!</button></center>
+        <form class="form-horizontal" role="form" action="choose_categ" method="post">
+              <center><button id="play_btn" type="submit" class="btn btn-danger btn-block">Play!</button></center>
         </form>
       </div>
     </div>
   </div>
 
 
-
-<div class="panel panel-danger">
+    <!-- <div class="panel panel-success"> -->
+    <div id="guesspanel" class="panel">
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
 
-          <div class="collapsetitle"><center>See how others think about you!</center></div>
-          <div class="collapsesub"><center>Spend  <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> to unlock an author</center></div>
+          <div class="collapsetitle"><center>Guess what others think!</center></div>
+          <div class="collapsesub"><center>Spend <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 50 to play</center></div>
+          <div class="collapsesub"><center>Earn up to <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 600</center></div>
+
         </a>
       </h4>
     </div>
     <div id="collapseTwo" class="panel-collapse collapse">
       <div class="panel-body">
-        <form class="form-horizontal" role="form" action="view_my_report" method="post">
-              <center><button type="submit" class="btn btn-danger btn-block">Go</button></center>
+        <form class="form-horizontal" role="form" action="choose_guess_categ" method="post">
+              <center><button id="play_btn" type="submit" class="btn btn-success btn-block">Play!</button></center>
         </form>
       </div>
-    </div>
-  </div>
-
-
-
-
-
-  <div class="panel panel-info">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-
-          <div class="collapsetitle"><center>Guess what others think!</center></div>
-          <div class="collapsesub"><center>Earn up to <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22"> 50</center></div>
-
-        </a>
-      </h4>
-    </div>
-    <div id="collapseThree" class="panel-collapse collapse">
-      <div class="panel-body">
+      <!-- <div class="panel-body">
 
         <%name_array = @@names.shuffle%>
         <%name_array.each do |name|%>
@@ -254,36 +276,85 @@
               <%quiz_array = bundle[1]%>
               <%puts "quiz_array[0]"%>
               <%puts quiz_array[0][:option0]%>
-              <form class="form-horizontal" role="form" action="play" method="post">
-                <center><button type="submit" class="btn btn-info btn-block" name="uuid" value="<%=bundle[0]%>" ><%=quiz_array[0]["option0"]%> vs <%=quiz_array[0]["option1"]%></button></center>
-              </form>
+                <%btnid = "button" + bundle[0]%>
+                <center><button id="<%=btnid%>" class="btn btn-success btn-block" name="uuid" value="<%=bundle[0]%>" ><%=quiz_array[0]["option0"]%> vs <%=quiz_array[0]["option1"]%></button></center>
+              <script type="text/javascript">
+                //<![CDATA[
+                   new guessButton("<%=btnid%>","<%=bundle[0]%>","<%=@@coins[session[:tester]]%>");
+                //]]>
+              </script>
             <%end%>
             </div>
         <%end%>
 
 
-        <!--
-        <div class="row">
-          <center>Guess what Albert thinks about... </center>
-          <form class="form-horizontal" role="form" action="play" method="post">
-              <center><button type="submit" class="btn btn-info btn-block">Angus vs Tiffany</button></center>
-          </form>
-          <form class="form-horizontal" role="form" action="play" method="post">
-              <center><button type="submit" class="btn btn-info btn-block">Angus vs Tiffany</button></center>
-          </form>
-        </div>
-        <div class="row">
-          <center>Guess what Albert thinks about... </center>
-          <form class="form-horizontal" role="form" action="choosepeople" method="post">
-              <center><button type="button" class="btn btn-info btn-block">Angus vs Tiffany</button></center>
-          </form>
-        </div>
-      -->
+      </div> -->
+    </div>
+  </div>
 
+
+
+<div id="viewpanel" class="panel">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+
+          <div class="collapsetitle"><center>See how others think about you!</center></div>
+          <div class="collapsesub"><center>Spend  <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> to unlock an author</center></div>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse">
+      <div class="panel-body">
+        <form class="form-horizontal" role="form" action="view_my_report" method="post">
+              <center><button type="submit" class="btn btn-info btn-block">Go</button></center>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+</div>
+</div>
+</div>
+
+<!-- Button trigger modal -->
+<button id="messagebtn" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+<!--       <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Your Messages</h4>
+      </div> -->
+      <div class="modal-body">
+
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+
+        <div>
+          Someone guessed <b>Who would go to gym?</b> correctly! 
+        <div><font color="#49d781"><img src="/img/coin.png" alt="Smiley face" width="22" height="22"> <font size="3">+</font>100</font>
+        </div>
+        <div>
+          Someone guessed <b>Who is a comedian?</b> wrong... 
+        <div><font color="#d32020"><img src="/img/coin.png" alt="Smiley face" width="22" height="22"> <font size="3">+</font>0</font>
+        </div>
+
+
+      </div>
+<!--       <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div> -->
     </div>
   </div>
 </div>
-</div>
+
 
 
 
@@ -291,6 +362,13 @@
 
   <script type="text/javascript">
   //<![CDATA[
+    var msgbtn = document.getElementById("messagebtn");
+    msgbtn.style.visibility='hidden';
+    // setTimeout(function(){clickbtn()},500);
+    function clickbtn(){
+      msgbtn.click()
+    }
+
 
 
     energy = <%=@@energy_left[session[:tester]]%>
@@ -312,6 +390,8 @@
        time_container.innerHTML = get_min_sec(secs_left);
     }
     function update_energy(containerID,timeID,playbtnID){
+
+
       if(energy < 5){
         //console.log("here")
         //console.log(energy)
@@ -419,12 +499,7 @@
       
 
       <!-- FOOTER -->
-      <footer>
-        <!-- <p><a href="/home">refresh this page</a></p> -->
-<!--<p>If you are not <%=session[:tester]%>, please go back to <a href="/">home</a> and choose your name.</p> 
--->    </br></br></br></br></br></br></br></br></br>
-    <p>&copy; 2014 Orrzs Inc.</p>
-      </footer>
+
 
     </div><!-- /.container -->
 

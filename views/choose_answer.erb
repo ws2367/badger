@@ -40,21 +40,82 @@
         display : inline-block;
       }
     #timesleftbig{
-      display: inline-block;
-      padding-left: 5pt;
+      font-size: 12pt;
+      color: #737373;
+      padding-left: 10px;
     }
     #shufflebtn{
       display: inline-block;
     }
     #timesleft{
       display: inline-block;
-      font-size: 18pt;
-      padding-left: 5pt;
+      font-size: 15pt;
     }
     #questionid{
       padding-right: 10px;
     }
     #coinicon{
+      display: inline-block;
+    }
+
+    #red_background{
+      background: #FFC0CB;
+      border-radius: 5px;
+      height: 100px;
+      margin-top: 7px;
+      margin-left: 7px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 0px;
+      padding-right: 0px;
+      font-size: 12pt;
+      min-width: 306px;
+      max-width: 653px;
+      min-height: 400px;
+    }
+    #rangeid{
+      width: 250px;
+    }
+
+/*    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 33px;
+        height: 33px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-gradient(
+            linear,
+            left top,
+            left bottom,
+            color-stop(0, #fefefe),
+            color-stop(0.49, #dddddd),
+            color-stop(0.51, #d1d1d1),
+            color-stop(1, #a1a1a1)
+        );
+        background-repeat: no-repeat;
+        background-position: 50%;
+    }*/
+
+    input[type='range']::-webkit-slider-thumb {
+        /*-webkit-appearance: none;*/
+        width: 33px;
+        height: 33px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-gradient(
+            linear,
+            left top,
+            left bottom,
+            color-stop(0, #fefefe),
+            color-stop(0.49, #dddddd),
+            color-stop(0.51, #d1d1d1),
+            color-stop(1, #a1a1a1)
+        );
+        background-repeat: no-repeat;
+        background-position: 50%;
+    }
+
+    #bettingleftid{
       display: inline-block;
     }
     </style>
@@ -95,7 +156,6 @@
     <!-- Marketing messaging and featurettes
     ================================================== -->
     <!-- Wrap the rest of the page in another container to center all the content. -->
-</br>
     <div class="container">
 
 
@@ -111,53 +171,79 @@
     </div>
   </div>
 
+  <div class="row">
+    <div id="red_background" class="col-xs-11 col-md-7">
+
+     <div class="col-xs-7 col-sm-8">
+     <center><button class="btn btn-warning" id="shufflebtn"><span class="glyphicon glyphicon-random"></span> Shuffle Question <img src="/img/coin.png" alt="Smiley face" width="22" height="22">30</button></font> 
+
+      <div id="timesleftbig"><div id="timesleft">3</div> times left</div>
+    </div>
+                  
+     </center>
 
 
 
+      </br></br></br>
+              <div class="col-xs-3 col-md-4"></div>
+              <div class="col-xs-2 col-md-1">
+                <%if session[:choose] == 1%>
+                   <b><font size="5pt" color="#FAF6A3" >1</font></b>
+                <%else%>
+                   <font size="5pt" color="#FFFFFF" >1</font>
+                <%end%>
+              </div>
+              <div class="col-xs-2 col-md-1">
+                <%if session[:choose] == 2%>
+                   <b><font size="5pt" color="#FAF6A3" >2</font></b>
+                <%else%>
+                   <font size="5pt" color="#FFFFFF" >2</font>
+                <%end%>
+              </div>        
+              <div class="col-xs-2 col-md-1">
+                <%if session[:choose] == 3%>
+                   <b><font size="5pt" color="#FAF6A3" >3</font></b>
+                <%else%>
+                   <font size="5pt" color="#FFFFFF" >3</font>
+                <%end%>
+              </div>
+</br></br>
 
-      <div class="row">
-        <div class="col-xs-3 col-md-2"></div>
-        <div class="col-xs-2 col-md-1">
-          <%if session[:choose] == 1%>
-             <b><font size="5pt" color="#FFCC33" >1</font></b>
-          <%else%>
-             <font size="5pt" color="#A8A8A8" >1</font>
-          <%end%>
-        </div>
-        <div class="col-xs-2 col-md-1">
-          <%if session[:choose] == 2%>
-             <b><font size="5pt" color="#FFCC33" >2</font></b>
-          <%else%>
-             <font size="5pt" color="#A8A8A8" >2</font>
-          <%end%>
-        </div>        
-        <div class="col-xs-2 col-md-1">
-          <%if session[:choose] == 3%>
-             <b><font size="5pt" color="#FFCC33" >3</font></b>
-          <%else%>
-             <font size="5pt" color="#A8A8A8" >3</font>
-          <%end%>
-        </div>
-      </div>
-    </br>
-      </br>
-        <div class="container my-container">
-         <div class="row">
-             <div class="col-xs-12 col-sm-12"><center><font size="5pt" color="333399"><div id="questionid"><%=session[:question]%></div><button class="btn btn-warning" id="shufflebtn"><span class="glyphicon glyphicon-random"></span>     <img src="/img/coin.jpg" alt="Smiley face" width="22" height="22">30</button></font> <div id="timesleftbig"> <span class="glyphicon glyphicon-remove"><div id="timesleft">3</div></div></div>
-         </div>
-          </br></br></br>
-         <div class="row">
-           <form id="nextform" role="form" action="choose_answer" method="post">   
-            <input type="hidden" name="question" value="<%=session[:question]%>"> 
-           <div class="col-xs-6 col-md-6">
-            <p><button type="submit" id="option0btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option0]%>"><%=session[:option0]%></button></p>
-           </div>
-           <div class="col-xs-6 col-md-6">
-              <p><button type="submit" id="option1btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option1]%>"><%=session[:option1]%></button></p>
-          </div>
-         </div><!-- /.row -->
-        <center><div id="toPutText" class="coins_font"></div>
-        </div>
+ <div class="col-xs-12 col-sm-12"><center><font size="5pt">
+  <div id="questionid"><%=session[:question]%></div>
+</div>
+
+
+                <form id="nextform" role="form" action="choose_answer" method="post">   
+                  <input type="hidden" name="question" value="<%=session[:question]%>"> 
+                  <input type="hidden" name="betting" value="0"> 
+                </br></br></br>
+                 <div class="col-xs-6 col-md-6">
+                  <p><button type="submit" id="option0btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option0]%>"><%=session[:option0]%></button></p>
+                 </div>
+                 <div class="col-xs-6 col-md-6">
+                    <p><button type="submit" id="option1btn" class="btn btn-info btn-lg btn-block" name="answer" value="<%=session[:option1]%>"><%=session[:option1]%></button></p>
+                </div>
+              <center>
+                    </form>
+              </br>
+              <font color="#4169e3" size="3pt">
+              Your bet <img src="/img/chip.png" alt="Smiley face" width="22" height="22"> <span id="range">0</span>
+              <input id="rangeid" type="range" min="0" max="<%=session[:bettingleft]%>" value="0" step="10" onchange="showValue(this.value,<%=session[:bettingleft]%>)" />
+            </font>
+              
+    </div>
+  </div>
+
+<script type="text/javascript">
+function showValue(newValue, bettingleft)
+{
+  var bettingleft = parseInt(bettingleft);
+  document.getElementById("range").innerHTML=newValue;
+  var myform = document.forms["nextform"];
+  myform.betting.value = newValue;
+}
+</script>
 
 
       <script type="text/JavaScript">
@@ -208,16 +294,6 @@
                     }
                  //]]>
       </script>
-    </form>
-<br>
-
-  <br>
-      <!-- FOOTER -->
-      <footer>
-      </br></br></br></br></br></br></br></br>
-    <!--    <p>If you are not <%=session[:tester]%>, please go back to <a href="/">home</a> and choose your name.</p>-->
-        <p>&copy; 2014 Orrzs Inc.</p>
-      </footer>
 
     </div><!-- /.container -->
 
