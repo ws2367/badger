@@ -127,17 +127,37 @@
           var myform = document.forms["rankingsform"];
           myform.submit();
         }
-        var refillEnergy=function(){
+        var gemClicked=function(){
            var gemele = document.getElementById("gemnum");
            var gemnum = gemele.innerHTML;
            if(gemnum == "0"){
-              alert("Not enough gems...");
+              alert("You can get a gem when leveling up.\nGem is used to refill energy.");
               return;
            }
-           if(confirm("Do you want to spend 1 gem to refill energy?")){
+           if(confirm("You can get a gem when leveling up.\nGem is used to refill energy.\n\nDo you want to refill your energy?")){
               var myform = document.forms["nextform"];
               myform.submit();
            }
+        }
+        var timeClicked=function(){
+          alert("Every 8 minutes you get 1 energy.");
+          return;
+        }
+        var energyClicked=function(){
+          alert("Your energy can be refilled by time or gem.\nSpend your energy to play the first Section.");
+          return;
+        }
+        var userClicked=function(){
+          alert("Press here to get back home.");
+          return;
+        }
+        var levelClicked=function(){
+          alert("Whenever you level up, you can get a gem.");
+          return;
+        }
+        var coinClicked=function(){
+          alert("Coins is the main currency of this game.\nCoins can be used to buy information, shuffle or bet.");
+          return;
         }
         //]]>
     </script>
@@ -152,13 +172,13 @@
     </form>
 
   <div class="row">
-    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+    <div id="player_name" class="col-xs-5 col-sm-3" onclick="userClicked()"><center>
         <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
       </center>
     </div>
-    <div id="coin_display" class="col-xs-4 col-sm-2"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
+    <div id="coin_display" class="col-xs-4 col-sm-2" onclick="coinClicked()"><center><img src="/img/coin.png" alt="Smiley face" width="25" height="25"><%= @@coins[session[:tester]] %></center></div>
     <!-- Optional: clear the XS cols if their content doesn't match in height -->
-    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><div id="gemnum"><%=@@gems[session[:tester]]%></div>
+    <div id="gem_display" class="col-xs-2 col-sm-2" onclick="gemClicked()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><div id="gemnum"><%=@@gems[session[:tester]]%></div>
     </center>
     </div>
   </div>
@@ -172,12 +192,12 @@
         <img src="/img/medal.png" alt="Smiley face" width="25" height="25">
       </center>
     </div>
-    <div id="level_display" class="col-xs-5 col-sm-3"><center>Level <%=@@level[session[:tester]]%> </center></div>
+    <div id="level_display" class="col-xs-5 col-sm-3" onclick="levelClicked()"><center>Level <%=@@level[session[:tester]]%> </center></div>
     <!-- Optional: clear the XS cols if their content doesn't match in height -->
-    <div id="energy_display" class="col-xs-2 col-sm-1" onclick="refillEnergy()"><center><img src="/img/energy.png" alt="Smiley face" width="25" height="25"><div id="energy_bar"><%= @@energy_left[session[:tester]] %></div>
+    <div id="energy_display" class="col-xs-2 col-sm-1" onclick="energyClicked()"><center><img src="/img/energy.png" alt="Smiley face" width="25" height="25"><div id="energy_bar"><%= @@energy_left[session[:tester]] %></div>
     </center>
     </div>
-    <div id="time_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center>
+    <div id="time_display" class="col-xs-2 col-sm-2" onclick="timeClicked()"><center>
       <%if @@energy_left[session[:tester]] == 5 %> Full <%end%></div>
     </center>
     </div>
@@ -277,7 +297,7 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
 
-          <div class="collapsetitle"><center>See how others think about you!</center></div>
+          <div class="collapsetitle"><center>See what others think about you!</center></div>
           <div class="collapsesub"><center>Spend  <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> to unlock an author</center></div>
         </a>
       </h4>

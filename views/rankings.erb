@@ -82,17 +82,15 @@
 
   <%@sortedLevelArray.reverse_each do |name,level|%>
 
-    <div class="row">
-      <div class="col-xs-2 col-sm-2"></div>
-      <div class="col-xs-4 col-sm-4"><b><%=name%></b></div>
-      <div class="col-xs-6 col-sm-6">Level <b><%=level%></b></div>
-    </div>
-    <div class="row">
-      <div class="col-xs-2 col-sm-2"></div>
-      <div class="col-xs-4 col-sm-4"></div>
+      <div class="col-xs-0 col-sm-1"></div>
+      <div class="col-xs-5 col-sm-5"><b><%=name%></b></div>
+      <div class="col-xs-4 col-sm-4">Level <b><%=level%></b></div>
+</br>
+      <div class="col-xs-0 col-sm-1"></div>
+      <div class="col-xs-5 col-sm-5"></div>
       <div class="col-xs-6 col-sm-6"><font color="#33CC66"><%=@@wins[name]%> wins</font><font color="#CC3366"> <%=@@losses[name]%> losses</font></div> 
-    </div>
-   </br>
+
+   </br></br>
   <%end%>
 
 </font>
