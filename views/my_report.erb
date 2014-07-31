@@ -218,13 +218,13 @@
     // overall pentagon
       var firstPentagon = [
               [
-              {axis:"Relationship",value:<%=@oldR%>},
-              {axis:"Professional",value:<%=@oldP%>},
-              {axis:"Social",value:<%=@oldS%>}
+              {axis:"Relationship",value:<%=@@score_buffer[@name]["old"]["R"]%>},
+              {axis:"Professional",value:<%=@@score_buffer[@name]["old"]["P"]%>},
+              {axis:"Social",value:<%=@@score_buffer[@name]["old"]["S"]%>}
               ],[
-              {axis:"Relationship",value:<%=@newR%>},
-              {axis:"Professional",value:<%=@newP%>},
-              {axis:"Social",value:<%=@newS%>}
+              {axis:"Relationship",value:<%=@@score_buffer[@name]["new"]["R"]%>},
+              {axis:"Professional",value:<%=@@score_buffer[@name]["new"]["P"]%>},
+              {axis:"Social",value:<%=@@score_buffer[@name]["new"]["S"]%>}
               ]
             ];
       var oldColor1 = "#7a93df";
@@ -232,39 +232,41 @@
       new Pentagon(firstPentagon, '<%=@time_difference%>',oldColor1,newColor1,"body1","chart1","#body1","#chart1");
 
       // relationship pentagon
-        var Rdimensions = ["Commitment","Attraction", "Communication","Maturity"];
+        <% R_dims = @@score_buffer[@name]["new"]["detail"]["R"].keys 
+           last_dim = R_dims.last%>
         var secondPentagon = [
               [
-              {axis:Rdimensions[0],value:<%=@oldR%>},
-              {axis:Rdimensions[1],value:<%=@oldP%>},
-              {axis:Rdimensions[2],value:<%=@oldS%>},
-              {axis:Rdimensions[3],value:<%=@oldS%>}
+              <% R_dims.each do |dim|%>
+              {axis:"<%=dim%>",value:<%=@@score_buffer[@name]["old"]["detail"]["R"][dim]%>}
+              <%=(last_dim == dim)? "":","%>
+              <%end%>
               ],[
-              {axis:Rdimensions[0],value:<%=@newR%>},
-              {axis:Rdimensions[1],value:<%=@newP%>},
-              {axis:Rdimensions[2],value:<%=@newS%>},
-              {axis:Rdimensions[3],value:<%=@newS%>}
+              <% R_dims.each do |dim|%>
+              {axis:"<%=dim%>",value:<%=@@score_buffer[@name]["new"]["detail"]["R"][dim]%>}
+              <%=(last_dim == dim)? "":","%>
+              <%end%>
               ]
+              
             ];
         var oldColor2 = "#fcff28";
         var newColor2 = "#96df7a";
         new Pentagon(secondPentagon, '<%=@time_difference%>',oldColor2,newColor2,"body2","chart2","#body2","#chart2");
 
         // Professional Pentagon
-        var Pdimensions = ["Excel", "Manage", "Communicate","Dare","Adapt"];
+        //var Pdimensions = ["Excel", "Manage", "Communicate","Dare","Adapt"];
+        <% P_dims = @@score_buffer[@name]["new"]["detail"]["P"].keys 
+           last_dim = P_dims.last%>
         var thirdPentagon = [
               [
-              {axis:Pdimensions[0],value:<%=@oldR%>},
-              {axis:Pdimensions[1],value:<%=@oldP%>},
-              {axis:Pdimensions[2],value:<%=@oldS%>},
-              {axis:Pdimensions[3],value:<%=@oldS%>},
-              {axis:Pdimensions[4],value:<%=@oldS%>}
+              <% P_dims.each do |dim|%>
+              {axis:"<%=dim%>",value:<%=@@score_buffer[@name]["old"]["detail"]["P"][dim]%>}
+              <%=(last_dim == dim)? "":","%>
+              <%end%>
               ],[
-              {axis:Pdimensions[0],value:<%=@newR%>},
-              {axis:Pdimensions[1],value:<%=@newP%>},
-              {axis:Pdimensions[2],value:<%=@newS%>},
-              {axis:Pdimensions[3],value:<%=@newS%>},
-              {axis:Pdimensions[4],value:<%=@newS%>}
+              <% P_dims.each do |dim|%>
+              {axis:"<%=dim%>",value:<%=@@score_buffer[@name]["new"]["detail"]["P"][dim]%>}
+              <%=(last_dim == dim)? "":","%>
+              <%end%>
               ]
             ];
         var oldColor3 = "#2dffc1";
@@ -272,18 +274,20 @@
         new Pentagon(thirdPentagon, '<%=@time_difference%>',oldColor3,newColor3,"body3","chart3","#body3","#chart3");
 
         //social pentagon
-        var Sdimensions = ["Communication", "Charisma", "Adaptability","Proactive"];
+        //var Sdimensions = ["Communication", "Charisma", "Adaptability","Proactive"];
+        <% S_dims = @@score_buffer[@name]["new"]["detail"]["S"].keys 
+           last_dim = S_dims.last%>
         var fourthPentagon = [
               [
-              {axis:Sdimensions[0],value:<%=@oldR%>},
-              {axis:Sdimensions[1],value:<%=@oldP%>},
-              {axis:Sdimensions[2],value:<%=@oldS%>},
-              {axis:Sdimensions[3],value:<%=@oldS%>}
+              <% S_dims.each do |dim|%>
+              {axis:"<%=dim%>",value:<%=@@score_buffer[@name]["old"]["detail"]["S"][dim]%>}
+              <%=(last_dim == dim)? "":","%>
+              <%end%>
               ],[
-              {axis:Sdimensions[0],value:<%=@newR%>},
-              {axis:Sdimensions[1],value:<%=@newP%>},
-              {axis:Sdimensions[2],value:<%=@newS%>},
-              {axis:Sdimensions[3],value:<%=@newS%>}
+              <% S_dims.each do |dim|%>
+              {axis:"<%=dim%>",value:<%=@@score_buffer[@name]["new"]["detail"]["S"][dim]%>}
+              <%=(last_dim == dim)? "":","%>
+              <%end%>
               ]
             ];
         var oldColor4 = "#ffa939";

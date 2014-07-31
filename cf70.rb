@@ -120,7 +120,7 @@ def initialize_record
   @@progress = Hash.new
   @@gems = Hash.new
   @@unlocked_uuid_index = Hash.new
-  @@data_to_w_r = ["categories", "spiderweb_buffer","logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
+  @@data_to_w_r = ["categories", "score_buffer","logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
   @@wins = Hash.new
   @@losses = Hash.new
 
@@ -132,7 +132,7 @@ def initialize_record
   @@unlock_someone = Hash.new
   @@logged_in = Hash.new
 
-  @@spiderweb_buffer = Hash.new
+  @@score_buffer = Hash.new
 
   @@record = Array.new 
   prng = Random.new(1234)
@@ -499,16 +499,29 @@ post '/refill' do
 end
 
 
+def normalize score
+  multiplier = 0.0333333
+  Math.atan(multiplier * score.to_f)/(Math::PI) + 0.5
+end
+
 def normalize_score scores
   res = Hash.new
-  multiplier = 0.0333333
-  scores.each{|key, value| 
+  scores.each do |key, value| 
     if ["S", "R", "P"].include? key
-      res[key] = Math.atan(multiplier * value.to_f)/(Math::PI) + 0.5
-    else
+      res[key] = normalize value
+    elsif key == "detail"
+      res[key] = Hash.new
+    #value = {"S"=>{"dim1":2.0, "dim2":3.2}, "P"=>... }
+      value.each {|categ, dims|
+        res[key][categ] = Hash.new
+        dims.each { |dim, score|
+          res[key][categ][dim] = normalize score
+        }
+      }
+    else # "time" => Time....
       res[key] = value
     end
-  }
+  end
   return res
 end
 
@@ -553,23 +566,28 @@ route :get, :post, '/view_my_report' do
 
   @name = session[:tester]
 
-  if @@spiderweb_buffer[@name] == nil
-    @@spiderweb_buffer[@name] = Hash.new
-    @@spiderweb_buffer[@name]["old"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
-    @@spiderweb_buffer[@name]["new"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now}
+  if @@score_buffer[@name] == nil
+    @@score_buffer[@name] = Hash.new
+    @@score_buffer[@name]["old"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now, 
+                                        "detail"=> {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
+                                       }
+    @@score_buffer[@name]["new"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now, 
+                                        "detail"=> {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
+                                       }
+    CATEGORIES.each do |categ, dims|
+      dims.each do |dim|
+        @@score_buffer[@name]["old"]["detail"][categ][dim] = 0.5
+        @@score_buffer[@name]["new"]["detail"][categ][dim] = 0.5
+      end                              
+    end
   end
 
   @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now,
              "detail" => {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
             }
-
-  # first flatten the parcels to an array of quizes only 
+  
   relevants = @@librarian.get_relevant_quizzes(@name)
 
-  # relevants = @@generated_bundles.values.flatten(1).map{ |parcel| parcel[1]}.flatten.
-  #              select{|quiz| (quiz["option0"] == @name) or (quiz["option1"] == @name)}
-  
-  
   CATEGORIES.each do |categ, dims|
     dims.each do |dim|
         @scores["detail"][categ][dim] = 0.0
@@ -601,39 +619,33 @@ route :get, :post, '/view_my_report' do
   puts "score after"
   puts @scores.inspect
 
-  time_diff_w_old = @scores["time"] - @@spiderweb_buffer[@name]["old"]["time"]
-  time_diff_w_new = @scores["time"] - @@spiderweb_buffer[@name]["new"]["time"]
+  time_diff_w_old = @scores["time"] - @@score_buffer[@name]["old"]["time"]
+  time_diff_w_new = @scores["time"] - @@score_buffer[@name]["new"]["time"]
 
   # First rule: Never too old
   if time_diff_w_old > TIME_DIFFERENCE_UPPER_BOUND
-    @@spiderweb_buffer[@name]["old"] = @@spiderweb_buffer[@name]["new"]
+    @@score_buffer[@name]["old"] = @@score_buffer[@name]["new"]
   # Second rule: Never too new
   elsif time_diff_w_new < TIME_DIFFERENCE_LOWER_BOUND
 
   else
     # Third rule: The one with larger difference stays
-    diff_w_old = (@scores["S"] - @@spiderweb_buffer[@name]["old"]["S"]).abs + 
-                 (@scores["P"] - @@spiderweb_buffer[@name]["old"]["P"]).abs + 
-                 (@scores["R"] - @@spiderweb_buffer[@name]["old"]["R"]).abs
+    diff_w_old = (@scores["S"] - @@score_buffer[@name]["old"]["S"]).abs + 
+                 (@scores["P"] - @@score_buffer[@name]["old"]["P"]).abs + 
+                 (@scores["R"] - @@score_buffer[@name]["old"]["R"]).abs
 
-    diff_w_new = (@scores["S"] - @@spiderweb_buffer[@name]["new"]["S"]).abs + 
-                 (@scores["P"] - @@spiderweb_buffer[@name]["new"]["P"]).abs + 
-                 (@scores["R"] - @@spiderweb_buffer[@name]["new"]["R"]).abs
+    diff_w_new = (@scores["S"] - @@score_buffer[@name]["new"]["S"]).abs + 
+                 (@scores["P"] - @@score_buffer[@name]["new"]["P"]).abs + 
+                 (@scores["R"] - @@score_buffer[@name]["new"]["R"]).abs
 
     if diff_w_new > diff_w_old
-      @@spiderweb_buffer[@name]["old"] = @@spiderweb_buffer[@name]["new"]
+      @@score_buffer[@name]["old"] = @@score_buffer[@name]["new"]
     end
   end
-  @@spiderweb_buffer[@name]["new"] = @scores
+  @@score_buffer[@name]["new"] = @scores
 
-  @time_difference = sec_to_units(@@spiderweb_buffer[@name]["new"]["time"] - @@spiderweb_buffer[@name]["old"]["time"])
-  @oldR = @@spiderweb_buffer[@name]["old"]["R"]
-  @oldP = @@spiderweb_buffer[@name]["old"]["P"]
-  @oldS = @@spiderweb_buffer[@name]["old"]["S"]
-  @newR = @@spiderweb_buffer[@name]["new"]["R"]
-  @newP = @@spiderweb_buffer[@name]["new"]["P"]
-  @newS = @@spiderweb_buffer[@name]["new"]["S"]
-
+  @time_difference = sec_to_units(@@score_buffer[@name]["new"]["time"] - @@score_buffer[@name]["old"]["time"])
+  
   @contributors = collect_contributors(@name)
 
   @guesser_questions = @@librarian.get_guesser_questions(@name)
