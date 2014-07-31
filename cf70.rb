@@ -19,7 +19,7 @@ REFILL = 480
 ENERGY_CAPACITY = 5
 TIME_DIFFERENCE_UPPER_BOUND = 8 * 60 * 60 # secs
 TIME_DIFFERENCE_LOWER_BOUND = 5 * 60 # secs
-INITIAL_COINS = 1000
+INITIAL_COINS = 0
 PLAY_MAX_BET = 200
 GUESS_MAX_BET = 200
 
@@ -748,7 +748,7 @@ post '/result' do
   end
   @@coins[session[:tester]] += @reward
 
-  addupXP(@reward, session[:tester])
+  addupXP(@reward*3, session[:tester])
     
   if @win >= 2
     @correct = true

@@ -94,7 +94,7 @@
 
 
    <div class="row">
-    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+    <div id="player_name" class="col-xs-5 col-sm-3" onclick="backtohome()"><center>
         <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
       </center>
     </div>
@@ -103,8 +103,18 @@
     <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><div id="gemnum"><%=@@gems[session[:tester]]%></div>
     </center>
     </div>
+    <form id="homeform" class="form-horizontal" role="form" action="home" method="post">
+      </form>
   </div>
-</br>
+
+       <script type="text/JavaScript">
+        //<![CDATA[
+        function backtohome(){
+          var homeform = document.forms["homeform"];
+          homeform.submit();
+        }
+           //]]>
+        </script>
 
   <!-- <h1>Records</h1> -->
 
@@ -136,10 +146,15 @@
                   </div>
               <%end%>
 
-
-              <form id="people_form" class="form-horizontal" role="form" action="home" method="post">
-
+              <form class="form-horizontal" role="form" action="choose_guess_categ" method="post">
+              <div class="col-xs-6 col-sm-6">
+                <center><button type="submit" class="btn btn-primary btn-block">Back</button></center>
+              </div>
+              </form>
+              <form class="form-horizontal" role="form" action="home" method="post">
+              <div class="col-xs-6 col-sm-6">
                 <center><button type="submit" class="btn btn-info btn-block">Home</button></center>
+              </div>
               </form>
 
       </div>
@@ -148,66 +163,6 @@
 
 
 
-      <script type="text/JavaScript">
-                 //<![CDATA[
-                    var myform = document.forms["people_form"];
-                    var option0ele = document.getElementById("option0");
-                    var option1ele = document.getElementById("option1");
-                    var shufflebtn = document.getElementById("shufflebtn");
-                    var coinele =  document.getElementById("coinicon");
-                    var timesleftele = document.getElementById("timesleft");
-                    myform.option0.value = option0ele.innerHTML;
-                    myform.option1.value = option1ele.innerHTML;
-                    var player = "<%=session[:tester]%>";
-                    var myNames = [<%= @@names.map { |some_id| '"' + some_id.to_s + '"' }.join(", ") %>];
-                    var costPerShuffle = 30;
-
-                    console.log(myNames[0]);
-                    shufflebtn.onclick = function(){
-                        var coinsNum = parseInt(coinele.innerHTML);
-                        if(coinsNum < costPerShuffle){
-                          alert("sorry... not enough coins...");
-                          return;
-                        }
-                        do {
-                          var new_option0 = myNames[Math.floor(Math.random()*myNames.length)];
-                        } while (new_option0 == player);
-                        do {
-                          var new_option1 = myNames[Math.floor(Math.random()*myNames.length)];
-                        } while (new_option1 == player || new_option1 == new_option0);
-                        option0ele.innerHTML = new_option0;
-                        option1ele.innerHTML = new_option1;
-                        myform.option0.value = option0ele.innerHTML;
-                        myform.option1.value = option1ele.innerHTML;
-                        coinsLeft = coinsNum - costPerShuffle;
-                        coinele.innerHTML = coinsLeft.toString();
-
-                        timesleft = parseInt(timesleftele.innerHTML);
-                        timesleft = timesleft - 1;
-                        if (timesleft == 0){
-                          timeleftbigele = document.getElementById("timesleftbig");
-                          timeleftbigele.parentNode.removeChild(timeleftbigele);
-                          shufflebtn.style.visibility = 'hidden';
-                        }else{
-                          timesleftele.innerHTML = timesleft.toString();
-                        }
-
-                        var myXHR = new XMLHttpRequest();
-                        myXHR.open("POST", "/shuffle_people" + "?tester=" + player + "&coinsLeft=" + coinele.innerHTML);
-                        myXHR.onreadystatechange = function() {
-                             if (this.readyState != 4) {
-                                return;
-                             }
-                             if (this.status == 200) {
-                                return;
-                             } else {
-                               console.log("error occurred!");
-                             }
-                         }
-                         myXHR.send();
-                    }
-                 //]]>
-      </script>
       <!-- FOOTER -->
 
     </div><!-- /.container -->

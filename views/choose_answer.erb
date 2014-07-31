@@ -160,7 +160,7 @@
 
 
    <div class="row">
-    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+    <div id="player_name" class="col-xs-5 col-sm-3" onclick="backtohome()"><center>
         <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
       </center>
     </div>
@@ -169,7 +169,19 @@
     <div id="gem_display" class="col-xs-2 col-sm-2" onclick="refillEnergy()"><center><img src="/img/gem.png" alt="Smiley face" width="25" height="25"><%=@@gems[session[:tester]]%>
     </center>
     </div>
+    <form id="homeform" class="form-horizontal" role="form" action="home" method="post" visibility="hidden"></form>
   </div>
+
+
+        <script type="text/JavaScript">
+        //<![CDATA[
+        function backtohome(){
+          var homeform = document.forms["homeform"];
+          homeform.submit();
+        }
+           //]]>
+        </script>
+
 
   <div class="row">
     <div id="red_background" class="col-xs-11 col-md-7">

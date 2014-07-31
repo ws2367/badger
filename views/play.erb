@@ -168,7 +168,7 @@
     <!-- Wrap the rest of the page in another container to center all the content. -->
     <div class="container">
               <div class="row">
-    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+    <div id="player_name" class="col-xs-5 col-sm-3" onclick="backtohome()"><center>
         <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
       </center>
     </div>
@@ -178,6 +178,19 @@
     </center>
     </div>
   </div>
+
+      <form id="homeform" class="form-horizontal" role="form" action="home" method="post">
+      </form>
+       <script type="text/JavaScript">
+        //<![CDATA[
+        function backtohome(){
+          var homeform = document.forms["homeform"];
+          homeform.submit();
+        }
+           //]]>
+        </script>
+
+
   <!-- <h1>Records</h1> -->
  <div class="row">
     <div id="red_background" class="col-xs-11 col-md-7">

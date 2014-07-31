@@ -52,8 +52,9 @@
     #pbtn, #rbtn, #sbtn, #fbtn{
       min-height: 60px;
       font-size: 15pt;
-      /*background-color: #000000;*/
+      background-color: #474747;
       color: #FFFFFF;
+      text-align: left;
     }
     </style>
 
@@ -73,7 +74,7 @@
   <!-- <h1>Records</h1> -->
 
    <div class="row">
-    <div id="player_name" class="col-xs-5 col-sm-3"><center>
+    <div id="player_name" class="col-xs-5 col-sm-3" onclick="backtohome()"><center>
         <img src="/img/user.png" alt="Smiley face" width="25" height="25">       <%=session[:tester]%>
       </center>
     </div>
@@ -83,6 +84,16 @@
     </center>
     </div>
   </div>
+        <form id="homeform" class="form-horizontal" role="form" action="home" method="post">
+      </form>
+       <script type="text/JavaScript">
+        //<![CDATA[
+        function backtohome(){
+          var homeform = document.forms["homeform"];
+          homeform.submit();
+        }
+           //]]>
+        </script>
 
   <!-- <h1>Records</h1> -->
 
@@ -90,14 +101,31 @@
     <div id="red_background" class="col-xs-11 col-md-7">
 
 </br>
-            <b><center><font size="5pt">Select a category:</font></center></b>
+          <center><font size="5pt">Select a category</font></center>
           </br>
           <form id="people_form" class="form-horizontal" role="form" action="choose_guess_people" method="post">
 
-            <center><button type="submit" id="pbtn" class="btn btn-primary btn-block" name="categ" value="P">Professional</button></center>
-            <center><button type="submit" id="rbtn" class="btn btn-primary btn-block" name="categ" value="R">Relationship</button></center>
-            <center><button type="submit" id="sbtn" class="btn btn-primary btn-block" name="categ" value="S">Social</button></center>
-            <center><button type="submit" id="fbtn" class="btn btn-primary btn-block" name="categ" value="F">Just for fun</button></center>
+            <button type="submit" id="pbtn" class="btn btn-block" name="categ" value="P">
+            <div class="col-xs-2 col-md-4"></div>
+            <div class="col-xs-4 col-md-4">
+            <img src="/img/professional.png" alt="Smiley face" width="44" height="44"> Professional
+            </div>
+            </button>
+            <button type="submit" id="rbtn" class="btn btn-block" name="categ" value="R">
+            <div class="col-xs-2 col-md-4"></div>
+            <div class="col-xs-4 col-md-4"><img src="/img/relationship.png" alt="Smiley face" width="44" height="44"> Relationship
+            </div>
+            </button>
+            <button type="submit" id="sbtn" class="btn btn-block" name="categ" value="S">
+            <div class="col-xs-2 col-md-4"></div>
+            <div class="col-xs-4 col-md-4"><img src="/img/social.png" alt="Smiley face" width="44" height="44"> Social
+            </div>
+            </button>
+            <button type="submit" id="fbtn" class="btn btn-block" name="categ" value="F">
+            <div class="col-xs-2 col-md-4"></div>
+            <div class="col-xs-4 col-md-4"><img src="/img/justforfun.png" alt="Smiley face" width="44" height="44"> Just for fun
+            </div>
+            </button>
 
           </form>
 
@@ -109,66 +137,7 @@
 
 
 
-      <script type="text/JavaScript">
-                 //<![CDATA[
-                    var myform = document.forms["people_form"];
-                    var option0ele = document.getElementById("option0");
-                    var option1ele = document.getElementById("option1");
-                    var shufflebtn = document.getElementById("shufflebtn");
-                    var coinele =  document.getElementById("coinicon");
-                    var timesleftele = document.getElementById("timesleft");
-                    myform.option0.value = option0ele.innerHTML;
-                    myform.option1.value = option1ele.innerHTML;
-                    var player = "<%=session[:tester]%>";
-                    var myNames = [<%= @@names.map { |some_id| '"' + some_id.to_s + '"' }.join(", ") %>];
-                    var costPerShuffle = 30;
-
-                    console.log(myNames[0]);
-                    shufflebtn.onclick = function(){
-                        var coinsNum = parseInt(coinele.innerHTML);
-                        if(coinsNum < costPerShuffle){
-                          alert("sorry... not enough coins...");
-                          return;
-                        }
-                        do {
-                          var new_option0 = myNames[Math.floor(Math.random()*myNames.length)];
-                        } while (new_option0 == player);
-                        do {
-                          var new_option1 = myNames[Math.floor(Math.random()*myNames.length)];
-                        } while (new_option1 == player || new_option1 == new_option0);
-                        option0ele.innerHTML = new_option0;
-                        option1ele.innerHTML = new_option1;
-                        myform.option0.value = option0ele.innerHTML;
-                        myform.option1.value = option1ele.innerHTML;
-                        coinsLeft = coinsNum - costPerShuffle;
-                        coinele.innerHTML = coinsLeft.toString();
-
-                        timesleft = parseInt(timesleftele.innerHTML);
-                        timesleft = timesleft - 1;
-                        if (timesleft == 0){
-                          timeleftbigele = document.getElementById("timesleftbig");
-                          timeleftbigele.parentNode.removeChild(timeleftbigele);
-                          shufflebtn.style.visibility = 'hidden';
-                        }else{
-                          timesleftele.innerHTML = timesleft.toString();
-                        }
-
-                        var myXHR = new XMLHttpRequest();
-                        myXHR.open("POST", "/shuffle_people" + "?tester=" + player + "&coinsLeft=" + coinele.innerHTML);
-                        myXHR.onreadystatechange = function() {
-                             if (this.readyState != 4) {
-                                return;
-                             }
-                             if (this.status == 200) {
-                                return;
-                             } else {
-                               console.log("error occurred!");
-                             }
-                         }
-                         myXHR.send();
-                    }
-                 //]]>
-      </script>
+     
       <!-- FOOTER -->
 
     </div><!-- /.container -->
