@@ -18,6 +18,7 @@
 class Librarian
 
   def initialize all_names
+    @notifications = Hash.new
     @records = Hash.new
     @bundles = Hash.new
     @bundles_played = Hash.new
@@ -25,11 +26,10 @@ class Librarian
     all_names.each do |name|
       initialize_for_a_player name
     end
-    puts "bundle whole first"
-    puts @bundles.inspect
   end  
 
   def initialize_for_a_player name
+    @notifications[name] = Array.new if @notifications[name] == nil
     @records[name] = Array.new if @records[name] == nil
     @bundles[name] = Array.new if @bundles[name] == nil
     @bundles_played[name] = Array.new if @bundles_played[name] == nil
@@ -41,17 +41,26 @@ class Librarian
 
   # win_record = ["true", "true", "false"]
   def record_win(guesser, bundle, author, win_record)
-    # author, bundle = get_bundle_by_uuid(uuid)
-    puts "bundle: " + bundle.inspect    
+    
     new_bundle = Array.new(bundle)
     new_bundle.each_with_index do |quiz, index|
       quiz["uuid"]   = UUIDTools::UUID.random_create.to_s
-      quiz["record"] = win_record[index]
+      quiz["record"] = win_record[index]      
     end
 
     @records[author] << {guesser: guesser, bundle:new_bundle}
   end
 
+  # return notification for tester
+  def get_notification tester
+    ret = Array.new(@notifications[tester])
+    @notifications[tester] = Array.new
+    return ret
+  end
+
+  def record_notification(tester, question, bet, correctness)
+    @notifications[tester] << [question, bet, correctness]
+  end
 
   def unlock_guesser(tester, uuid)
     @unlocked_guesser_uuid[tester] = Array.new if @unlocked_guesser_uuid[tester] == nil

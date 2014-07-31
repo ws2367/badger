@@ -17,7 +17,7 @@ REFILL = 480
 ENERGY_CAPACITY = 5
 TIME_DIFFERENCE_UPPER_BOUND = 8 * 60 * 60 # secs
 TIME_DIFFERENCE_LOWER_BOUND = 5 * 60 # secs
-INITIAL_COINS = 0
+INITIAL_COINS = 1000
 PLAY_MAX_BET = 200
 GUESS_MAX_BET = 200
 
@@ -269,12 +269,16 @@ route :get, :post, '/home' do
     @@started_playing[session[:tester]] = TRUE
   end
   @@logged_in[session[:tester]] << Time.now
+
+  #question, bet(Integer), correctness(BOOL)
+  @notifications = @@librarian.get_notification session[:tester]
   erb :home
 end
 
 get '/' do
   # if params[:id] == nil
-    erb :login
+  clear_session
+  erb :login
   # else
   #   erb :tel
   # end
@@ -655,8 +659,8 @@ post '/play' do
 
   # start the guessing
   if params[:uuid]
-    name, bundle = @@librarian.get_bundle_by_uuid(params[:uuid])
-    session[:guesswhom], session[:bundle] = name, bundle
+    session[:guesswhom],session[:bundle] = @@librarian.get_bundle_by_uuid(params[:uuid])
+    session[:uuid] = params[:uuid]
     @@librarian.just_played(session[:tester], params[:uuid])
   end
 
@@ -664,11 +668,11 @@ post '/play' do
   if params[:correct]
     session[:correct_history] << params[:correct]
     if params[:betting]
-        if params[:correct] == "true"
-          @@coins[session[:tester]] += params[:betting].to_i
-        else
-          @@coins[session[:tester]] -= params[:betting].to_i
-        end
+      if params[:correct] == "true"
+        @@coins[session[:tester]] += params[:betting].to_i
+      else
+        @@coins[session[:tester]] -= params[:betting].to_i
+      end
     end
   end
 
@@ -684,6 +688,34 @@ post '/play' do
 end
 
 post '/result' do
+  # for player-side betting
+  # conditions:
+  # bet > 0
+  # has not displayed before
+  # only happen at first time being played
+  tester, bundle = @@librarian.get_bundle_by_uuid(session[:uuid])
+  bundle.each_with_index do |quiz, index|
+    if quiz["done"] == false
+      puts quiz["bet"]
+      puts session[:correct_history][index]
+
+      @@coins[tester] += 2 * quiz["bet"] if session[:correct_history][index] == "true"
+
+      if quiz["displayed"] != true
+        
+        if quiz["bet"] > 0
+          # tester, question, bet, correctness
+          @@librarian.record_notification(tester, quiz["question"], 2 * quiz["bet"], 
+                                          session[:correct_history][index] == "true")
+        end
+
+        quiz["displayed"] = true
+      end
+
+      quiz["done"] = true
+    end
+  end
+
   @win = 0
   session[:correct_history].each do |value|
     if value == "true"
@@ -843,7 +875,7 @@ post '/next' do
 end
 
 post "/unlockGuesser" do
-  puts params[:uuid]
+  
   @@coins[session[:tester]] = @@coins[session[:tester]] - 300
   @@librarian.unlock_guesser(session[:tester], params[:uuid])
   status 200
