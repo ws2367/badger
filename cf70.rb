@@ -1,4 +1,7 @@
 # CF 4.0
+### 
+PORT = 7009
+### DO NOT CHANGE ANYTHING ABOVE THIS LINE
 
 require "addressable/uri"
 require 'sinatra'
@@ -11,7 +14,6 @@ require 'twilio-ruby'
 require './librarian.rb'
 
 IP = "0.0.0.0"
-PORT = 7009
 GAME_CYCLE = 600
 REFILL = 480
 ENERGY_CAPACITY = 5

@@ -31,6 +31,7 @@ class Librarian
   end  
 
   def initialize_for_a_player name
+    @unlocked_guesser_uuid[name] = Array.new if @unlocked_guesser_uuid[name] == nil
     @notifications[name] = Array.new if @notifications[name] == nil
     @records[name] = Array.new if @records[name] == nil
     @bundles[name] = Array.new if @bundles[name] == nil
