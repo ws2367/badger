@@ -28,8 +28,10 @@ var RadarChart = {
    //dunno what for yet
    w: 30,//(isIphone)? 180: 600,
    h: 30,//(isIphone)? 180: 600,
-   factor: 1,
-   factorLegend: .85,
+   //dunno what for
+   factor: 0.9,
+   //dunno what for
+   factorLegend: .65,
    levels: 3,
    maxValue: 0,
    //dont change
@@ -38,11 +40,11 @@ var RadarChart = {
    //dunno what for yet
    ToRight: 5,
    //change the x offset of Radar Chart
-   TranslateX: 78,
+   TranslateX: 85,
    TranslateY: 30,
    ExtraWidthX: 0,
    //to have a padding at bottom
-   ExtraWidthY: 10,
+   ExtraWidthY: 0,
    svgWidth:320,
    svgHeight:280,
    color: d3.scale.ordinal()

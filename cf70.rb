@@ -318,26 +318,26 @@ get '/tel' do
   erb :tel
 end
 
-# post '/welcome' do
-#   @current_tester = session[:tester]
+post '/welcome' do
+  @current_tester = session[:tester]
 
-#   if session[:stage] == "tel"
-#     session[:stage] = nil
-#     if (@@phone_number[@current_tester] == nil) or 
-#        (params[:skip] != "yes")
+  if session[:stage] == "tel"
+    session[:stage] = nil
+    if (@@phone_number[@current_tester] == nil) or 
+       (params[:skip] != "yes")
 
-#       phone_number = params[:phone_number]
+      phone_number = params[:phone_number]
 
-#       @@phone_number[@current_tester] = phone_number  
-#     end
-#   end
-#   if @@started_playing[session[:tester]] == nil
-#      set_interval(REFILL, session[:tester])
-#      @@started_playing[session[:tester]] = TRUE
-#   end
-#   @@logged_in[session[:tester]] << Time.now
-#   redirect to('/home'), 307
-# end
+      @@phone_number[@current_tester] = phone_number  
+    end
+  end
+  if @@started_playing[session[:tester]] == nil
+     set_interval(REFILL, session[:tester])
+     @@started_playing[session[:tester]] = TRUE
+  end
+  @@logged_in[session[:tester]] << Time.now
+  redirect to('/home'), 307
+end
 
 post '/choose_categ' do
   erb :choose_categ
