@@ -3,7 +3,9 @@
 <head>
   <title>CF Login</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable = no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta charset="UTF-8">
   <!-- Bootstrap core CSS -->
   <!-- Latest compiled and minified CSS -->
@@ -13,14 +15,8 @@
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
   <style>
   .gradient-color {
-    background: #ffd2c1; /* Old browsers */
-    background: -moz-linear-gradient(-45deg, #ffd2c1 0%, #f77b67 50%, #ffe2c9 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,#ffd2c1), color-stop(50%,#f77b67), color-stop(100%,#ffe2c9)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(-45deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(-45deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(-45deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* IE10+ */
-    background: linear-gradient(135deg, #ffd2c1 0%,#f77b67 50%,#ffe2c9 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffd2c1', endColorstr='#ffe2c9',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    background: #25211C; /* Old browsers */
+   
   }
   </style>
 </head>
@@ -41,6 +37,7 @@
       // The person is logged into Facebook, but not your app.
       
     } else {
+      document.getElementById('status').innerHTML = '<br><br><br>';
       // The person is not logged into Facebook, so we're not sure if
       // they are logged into this app or not.
       
@@ -99,8 +96,11 @@
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
       document.getElementById('status').innerHTML =
-        'Thanks for logging in, ' + response.name + '!';
-      window.location.href = "/home?name=" + response.name;
+        'Welcome back, ' + response.name + '!' + '<br><br>';
+      setTimeout(function(){
+        window.location.href = "/home?name=" + response.name;
+      },800);
+      //
     });
   }
 </script>
@@ -112,12 +112,12 @@
 -->
 <div class="jumbotron gradient-color">
   <font color="white">
+    <br>
+    <br>
   <center>
-  <h1>Yours</h1>
+  <img src="/img/yours_logo.png" width="250">
   <br>
-  <br>
-  
-  <div class="fb-login-button" data-max-rows="10" data-size="xlarge" data-show-faces="true" data-auto-logout-link="false" scope="public_profile,email" onlogin="checkLoginState();"></div>
+  <div class="fb-login-button" data-max-rows="10" data-size="xlarge" data-show-faces="false" data-auto-logout-link="true" scope="public_profile,email" onlogin="checkLoginState();"></div>
 
   <div id="status">
   </div>
