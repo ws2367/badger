@@ -373,6 +373,28 @@ post '/choose_people' do
   erb :choose_people
 end
 
+
+def already_exists(question, current_array)
+  current_array.each do |quiz|
+     if question == quiz["question"]
+      return true
+     end
+  end
+  return false
+end
+
+# this makes sure sampled question does not exist in bundle
+def sample_questions_in_categ categ, bundle
+
+  sample_base = 
+    @@questions.select do |qs| 
+      (@@categories[qs]["categ"] == categ) and 
+      (bundle.index{|quiz| quiz["question"] == qs} == nil)
+    end
+
+  return sample_base.sample
+end
+
 post '/choose_answer' do
 
   if session[:choose] == nil
@@ -391,12 +413,6 @@ post '/choose_answer' do
     session[:question] = params[:question]
   end
 
-  # if params[:betting]
-  #   puts "betting"
-  #   puts params[:betting]
-    
-  # end
-
   prng = Random.new
   if params[:answer] and params[:betting]
      quiz = Hash.new
@@ -414,35 +430,19 @@ post '/choose_answer' do
 
   if session[:choose] == 4
     
-    @@librarian.create_parcel(session[:tester], session[:bundle])
+    @@librarian.create_parcel(session[:tester], session[:bundle], session[:categ])
     clear_session
     redirect to('/choose_ending'), 307
   end
-  prng = Random.new
-  question = @@questions[prng.rand(@@questions.count)]
-  while already_exists(question, session[:bundle])
-    question = @@questions[prng.rand(@@questions.count)]
-  end
+
+  question = sample_questions_in_categ(session[:categ], session[:bundle])
+
   session[:question] = question
   session[:bettingleft] = (@@coins[session[:tester]] < PLAY_MAX_BET)? @@coins[session[:tester]] : PLAY_MAX_BET
   erb :choose_answer
 end
 
-def already_exists(question, current_array)
-  current_array.each do |quiz|
-     if question == quiz["question"]
-      return true
-     end
-  end
-  # if session[:skippedquestions]
-  #   session[:skippedquestions].each do |skippedquestion|
-  #     if question == skippedquestion
-  #       return true
-  #     end
-  #   end
-  # end
-  return false
-end
+
 
 def get_XP_needed(name)
   level = @@level[name]
@@ -643,6 +643,7 @@ post '/choose_guess_categ' do
 end
 
 post '/choose_guess_people' do
+  @categ = params[:categ]
   erb :choose_guess_people
 end
 

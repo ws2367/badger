@@ -116,7 +116,7 @@
               <%name_array = @@names.shuffle%>
               <%name_array.each do |name|%>
                   <%next if name==session[:tester]%>
-                  <%bundle_array = @@librarian.get_parcels(name)%>
+                  <%bundle_array = @@librarian.get_parcels_by_categ(name, @categ)%>
                   <%next if bundle_array==nil %>
                   <div>
                     <center>Guess what <%=name%> thinks about... </center>

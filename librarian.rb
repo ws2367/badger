@@ -13,7 +13,9 @@
   # 
   # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
                   #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}],
+  #           categ
+  #          ]
 
 class Librarian
 
@@ -102,11 +104,15 @@ class Librarian
   end
 
   # return uuid of the parcel
-  def create_parcel(name, bundle)
+  def create_parcel(name, bundle, categ)
     uuid = UUIDTools::UUID.random_create.to_s
     @bundles[name] = Array.new if @bundles[name] == nil
-    @bundles[name] << [uuid, bundle]
+    @bundles[name] << [uuid, bundle, categ]
     return uuid
+  end
+
+  def get_parcels_by_categ name, categ
+    return @bundles[name].select{|parcel| parcel[2] == categ}
   end
 
   def get_parcels name
