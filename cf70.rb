@@ -891,8 +891,8 @@ end
 
 post "/unlockGuesser" do
   puts "unlock guesser: " + params[:uuid]
-  @@coins[session[:tester]] = @@coins[session[:tester]] - 300
-  @@librarian.unlock_guesser(session[:tester], params[:uuid])
+  @@coins[session[:tester]] = @@coins[session[:tester]] - 100
+  # @@librarian.unlock_guesser(session[:tester], params[:uuid])
   status 200
   body ''
 end

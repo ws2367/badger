@@ -24,14 +24,14 @@ class Librarian
     @records = Hash.new
     @bundles = Hash.new
     @bundles_played = Hash.new
-    @unlocked_guesser_uuid = Hash.new
+    # @unlocked_guesser_uuid = Hash.new
     all_names.each do |name|
       initialize_for_a_player name
     end
   end  
 
   def initialize_for_a_player name
-    @unlocked_guesser_uuid[name] = Array.new if @unlocked_guesser_uuid[name] == nil
+    # @unlocked_guesser_uuid[name] = Array.new if @unlocked_guesser_uuid[name] == nil
     @notifications[name] = Array.new if @notifications[name] == nil
     @records[name] = Array.new if @records[name] == nil
     @bundles[name] = Array.new if @bundles[name] == nil
@@ -46,9 +46,9 @@ class Librarian
   def record_win(guesser, bundle, author, win_record)
     
     new_bundle = Array.new(bundle)
+    puts "recordd win: " + new_bundle.inspect
     new_bundle.each_with_index do |quiz, index|
-      quiz["uuid"]   = UUIDTools::UUID.random_create.to_s
-      quiz["record"] = win_record[index]      
+      quiz["record"] = win_record[index]
     end
 
     @records[author] << {guesser: guesser, bundle:new_bundle}
@@ -65,29 +65,35 @@ class Librarian
     @notifications[tester] << [question, bet, correctness]
   end
 
-  def unlock_guesser(tester, uuid)
-    @unlocked_guesser_uuid[tester] = Array.new if @unlocked_guesser_uuid[tester] == nil
-    @unlocked_guesser_uuid[tester] << uuid
-  end
+  # def unlock_guesser(tester, uuid)
+  #   @unlocked_guesser_uuid[tester] = Array.new if @unlocked_guesser_uuid[tester] == nil
+  #   @unlocked_guesser_uuid[tester] << uuid
+  # end
 
-  def is_guesser_unlocked?(tester, uuid)
-    @unlocked_guesser_uuid[tester] = Array.new if @unlocked_guesser_uuid[tester] == nil
-    return @unlocked_guesser_uuid[tester].include? uuid
-  end
+  # def is_guesser_unlocked?(tester, uuid)
+  #   @unlocked_guesser_uuid[tester] = Array.new if @unlocked_guesser_uuid[tester] == nil
+  #   return @unlocked_guesser_uuid[tester].include? uuid
+  # end
 
   def get_guesser_questions(tester_name)
-    guesser_questions = Array.new
+    guesser_questions = Hash.new
     @records[tester_name].each do |hash|
       hash[:bundle].each do |quiz|
+        if guesser_questions[quiz["uuid"]] == nil
+          guesser_questions[quiz["uuid"]] = {"right"=> Array.new, 
+                                             "wrong"=> Array.new, 
+                                             "quiz"=> quiz
+                                             }
+        end
         if quiz["record"] == "true"
-          guesser_questions << {"guesser"=> hash[:guesser], 
-                                "quiz"=> quiz
-                                }
+          guesser_questions[quiz["uuid"]]["right"] << hash[:guesser]
+        else
+          guesser_questions[quiz["uuid"]]["wrong"] << hash[:guesser]
         end
       end
     end
     
-    return guesser_questions
+    return guesser_questions.values
   end
 
   # return an array of records
@@ -107,6 +113,9 @@ class Librarian
   # return uuid of the parcel
   def create_parcel(name, bundle, categ)
     uuid = UUIDTools::UUID.random_create.to_s
+    bundle.each do |quiz|
+      quiz["uuid"]   = UUIDTools::UUID.random_create.to_s
+    end
     @bundles[name] = Array.new if @bundles[name] == nil
     @bundles[name] << [uuid, bundle, categ]
     return uuid

@@ -4,9 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
+    
     <title>Badger</title>
 
     <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -92,13 +90,13 @@
     }
 
     // Unlock guesser
-    priceOfUnlockGuesser = 300;
-    function UnlockGuesserBtn(btnParentId, btnId, uuid, coinId, author){
-       this.btnParent = document.getElementById(btnParentId);
-       this.btn = document.getElementById(btnId);
+    // new UnlockGuesserBtn("guessBtnId", "quiz['uuid']","coinicon"); 
+    priceOfUnlockGuesser = 100;
+    function UnlockGuesserBtn(btnId ,uuid, coinId, modalId){
        this.coinLabel = document.getElementById(coinId);
+       this.btn = document.getElementById(btnId);
        this.uuid = uuid;
-       this.author = author;
+       this.modalId = modalId;
        var obj = this;
        this.btn.onclick = function(){obj.btnClicked();}    
     }
@@ -112,10 +110,10 @@
            window.alert("sorry, not enough coins...");
            return;
        }
+       $("#" + this.modalId).modal('show');
        obj.coinLabel.innerHTML = (coinsNum - priceOfUnlockGuesser).toString();
-       obj.btnParent.removeChild(obj.btn);
-       var authorTextNode = document.createTextNode(obj.author);
-       obj.btnParent.appendChild(authorTextNode);
+       
+       
        //send request
        var myXHR = new XMLHttpRequest();
        myXHR.open("POST", "/unlockGuesser" + "?uuid=" + obj.uuid);
@@ -319,27 +317,11 @@
     <%quiz = question[3]%>
     <%found = @@unlocked_uuid_index[session[:tester]] && @@unlocked_uuid_index[session[:tester]].include?(index_array)%>
     <div class="container my-container">
-      <font color="orange" size="5pt">
-        <span class="glyphicon glyphicon-user"></span>
-        <%if found%>
-           <%=question[2]%>
-        <%else%>
-           <%divID = "authorDiv" + index_array[0].to_s + index_array[1].to_s%>
-           <%btnID = "authorBtn" + index_array[0].to_s + index_array[1].to_s%>
-           <div class="inline_form" id=<%=divID%> >
-                    <button id=<%=btnID%> class="btn btn-warning">Unlock</button>
-           </div>
-           <script type="text/JavaScript">
-                 //<![CDATA[
-                    console.log("here")
-                    new UnlockBtn("<%=divID%>", "<%=btnID%>", "<%=index_array[0].to_s%>", "<%=index_array[1].to_s%>","coinicon", "<%=question[2]%>","<%=session[:tester]%>"); 
-                 //]]>
-           </script>
-        <%end%>
-      </font>
+      <!-- question row -->
       <div class="row">
         <div class="col-xs-12 col-sm-8"><center><%=quiz["question"]%></center></div>
       </div>
+      <!-- answer row -->
       <div class="row">
         <div class="col-xs-6 col-sm-4"><center>
           <%if quiz["option0"] == quiz["answer"]%>
@@ -376,38 +358,34 @@
     <br>
   <%end%>
   </div>
-</div>
+  </div>
   <div class="tab-pane" id="guesser">
     <div class="container-marketing">
-
+      
       <div class="col-xs-12 col-sm-12"  style="background-color: #66CCFF;" >
-      <center><font color="white" size="3pt">Spend <img src="/img/coin.png" width="17" height="17"> 300 to unlock an author</font></center>
+      <center><font color="white" size="3pt">See who guessed your answer correctly for <img src="/img/coin.png" width="22" height="22"> 100!</font></center>
     </div>
       <br>
-      <%@guesser_questions.each do |question|%>
+      <br>
+      <%
+      #   question = {"right"=> Array.new, 
+                 #    "wrong"=> Array.new, 
+                 #    "quiz"=> quiz
+                 #   }
+      puts "guesser: " + @guesser_questions.inspect
+      @guesser_questions.each do |question|%>
         <%quiz  = question["quiz"]%>
-        <%found = @@librarian.is_guesser_unlocked?(session[:tester], quiz["uuid"])%>
+        <%if quiz["option0"] == quiz["answer"]
+            leftGuesser  = question['right']
+            rightGuesser = question['wrong']
+          else
+            leftGuesser  = question['wrong']
+            rightGuesser = question['right']
+          end
+          %>
 
         <div class="container my-container">
-          <font color="orange" size="5pt">
-            <span class="glyphicon glyphicon-user"></span>
-            <%if found%>
-               <%=question["guesser"]%>
-            <%else%>
-               <%divID = "authorDiv" + quiz["uuid"]%>
-               <%btnID = "authorBtn" + quiz["uuid"]%>
-               <div class="inline_form" id="<%=divID%>" >
-                        <button id="<%=btnID%>" class="btn btn-warning">Unlock</button>
-               </div>
-               <script type="text/JavaScript">
-                     //<![CDATA[
-                        console.log("here")
-                        //btnParentId, btnId, uuid, coinId, author
-                        new UnlockGuesserBtn("<%=divID%>", "<%=btnID%>", "<%=quiz['uuid']%>","coinicon", "<%=question['guesser']%>"); 
-                     //]]>
-               </script>
-            <%end%>
-          </font>
+          
           <div class="row">
             <div class="col-xs-12 col-sm-8"><center><%=quiz["question"]%></center></div>
           </div>
@@ -445,19 +423,97 @@
               </center>
             </div>
           </div>
+          <!-- unlock buttons row-->
+          <div class="row"> 
+            <!-- unlock buttons left cell-->
+            <div class="col-xs-6 col-sm-4">
+              <center>
+                <%if leftGuesser.count == 0%>
+                <button class="btn btn-warning" disabled="disabled">Unlock</button>
+                  0 <span class="glyphicon glyphicon-user"></span>
+                <%else%>
+                  <% guessBtnId = "guessLeftBtn" + quiz["uuid"]%>
+                  <% guessModalId = "guessLeftModal" + quiz["uuid"]%>
+                  <button id="<%=guessBtnId%>" class="btn btn-warning" data-toggle="modal">Unlock</button>
+                    <%=leftGuesser.count%>
+                   <span class="glyphicon glyphicon-user"></span>
+                  <script type="text/JavaScript">
+                      //<![CDATA[
+                        //btnId, uuid, coinId
+                        new UnlockGuesserBtn("<%=guessBtnId%>", "<%=quiz['uuid']%>","coinicon", "<%=guessModalId%>"); 
+                      //]]>
+                  </script>
+                  
+                  <div class="modal fade" id="<%=guessModalId%>" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                      <div class="modal-content">
+                        <br>
+                        <br>
+                        <p class="lead">
+                          <b>People who guessed your answer correctly</b>
+                          <hr>
+                          <%=leftGuesser.join(", ")%>
+                        </p>
+                        <br>
+                        <br>
+                      </div>
+                    </div>
+                  </div>
+                <%end%>
+              </center>
+            </div>
+            <!-- unlock buttons right cell-->
+            <div class="col-xs-6 col-sm-4">
+              <center>
+                <%if rightGuesser.count == 0%>
+                  <button class="btn btn-warning" disabled="disabled">Unlock</button>
+                  0 <span class="glyphicon glyphicon-user"></span>
+                <%else%>
+                  <% guessBtnId = "guessRightBtn" + quiz["uuid"]%>
+                  <% guessModalId = "guessRightModal" + quiz["uuid"]%>
+                  <button id="<%=guessBtnId%>" class="btn btn-warning" data-toggle="modal">Unlock</button> 
+                    <%=rightGuesser.count%>
+                   <span class="glyphicon glyphicon-user"></span>
+                  <script type="text/JavaScript">
+                      //<![CDATA[
+                        //btnId, uuid, coinId
+                        new UnlockGuesserBtn("<%=guessBtnId%>", "<%=quiz['uuid']%>","coinicon", "<%=guessModalId%>"); 
+                      //]]>
+                  </script>
+                  
+                  <div class="modal fade" id="<%=guessModalId%>" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                      <div class="modal-content">
+
+                        <br>
+                        <br>
+                        <p class="lead">
+                          <b>People who guessed your answer correctly</b>
+                          <hr>
+                          <br>
+                          <%=rightGuesser.join(", ")%>
+                        </p>
+                        <br>
+                        <br>
+                      </div>
+                    </div>
+                  </div>
+                <%end%>
+              </center>
+              
+            </div>
+          </div>
         </div>
         <br>
       <%end%>
-
+  
     </div>
   </div>
 
+    <form id="people_form" class="form-horizontal" role="form" action="home" method="post">
 
-
-              <form id="people_form" class="form-horizontal" role="form" action="home" method="post">
-
-                <center><button type="submit" class="btn btn-info btn-block">Home</button></center>
-              </form>
+      <center><button type="submit" class="btn btn-info btn-block">Home</button></center>
+    </form>
 
 <!-- red background end -->
 </div>
