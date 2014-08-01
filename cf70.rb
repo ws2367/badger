@@ -890,7 +890,7 @@ post '/next' do
 end
 
 post "/unlockGuesser" do
-  
+  puts "unlock guesser: " + params[:uuid]
   @@coins[session[:tester]] = @@coins[session[:tester]] - 300
   @@librarian.unlock_guesser(session[:tester], params[:uuid])
   status 200

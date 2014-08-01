@@ -383,7 +383,7 @@
       <div class="col-xs-12 col-sm-12"  style="background-color: #66CCFF;" >
       <center><font color="white" size="3pt">Spend <img src="/img/coin.png" width="17" height="17"> 300 to unlock an author</font></center>
     </div>
-      
+      <br>
       <%@guesser_questions.each do |question|%>
         <%quiz  = question["quiz"]%>
         <%found = @@librarian.is_guesser_unlocked?(session[:tester], quiz["uuid"])%>
@@ -396,14 +396,14 @@
             <%else%>
                <%divID = "authorDiv" + quiz["uuid"]%>
                <%btnID = "authorBtn" + quiz["uuid"]%>
-               <div class="inline_form" id=<%=divID%> >
-                        <button id=<%=btnID%> class="btn btn-warning">Unlock</button>
+               <div class="inline_form" id="<%=divID%>" >
+                        <button id="<%=btnID%>" class="btn btn-warning">Unlock</button>
                </div>
                <script type="text/JavaScript">
                      //<![CDATA[
                         console.log("here")
                         //btnParentId, btnId, uuid, coinId, author
-                        new UnlockGuesserBtn("<%=divID%>", "<%=btnID%>", "<%=quiz['uuid']%>","coinId", "<%=question['guesser']%>"); 
+                        new UnlockGuesserBtn("<%=divID%>", "<%=btnID%>", "<%=quiz['uuid']%>","coinicon", "<%=question['guesser']%>"); 
                      //]]>
                </script>
             <%end%>
