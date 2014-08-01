@@ -65,6 +65,7 @@ end
 def extract_categ
   categories = @@categories.values.map{|hash| hash["categ"]}.uniq
   categories.each do |categ|
+    next if categ == "F"
     CATEGORIES[categ] = Array.new
     dims = @@categories.values.select{|hash| hash["categ"] == categ}.map{|hash| hash["dim"]}.uniq
     dims.each do |dim|
@@ -599,8 +600,10 @@ route :get, :post, '/view_my_report' do
   end
 
   relevants.each do |quiz|
-    value     = @@categories[quiz["question"]]["value"]
     category  = @@categories[quiz["question"]]["categ"]
+    next if category == "F"
+
+    value     = @@categories[quiz["question"]]["value"]
     dim       = @@categories[quiz["question"]]["dim"]
     # att       = @@categories[quiz["question"]]["att"]
 
