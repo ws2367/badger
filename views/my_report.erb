@@ -181,9 +181,9 @@
 
   <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist" id="myTab">
-  <li class="active"><a href="#spiderweb" role="tab" data-toggle="tab">SpiderWeb</a></li>
-  <li><a href="#author" role="tab" data-toggle="tab">Author</a></li>
-  <li><a href="#guesser" role="tab" data-toggle="tab">Guesser</a></li>
+  <li class="active"><a href="#spiderweb" role="tab" data-toggle="tab">Profile</a></li>
+  <li><a href="#author" role="tab" data-toggle="tab">Choose you</a></li>
+  <li><a href="#guesser" role="tab" data-toggle="tab">Get you</a></li>
 </ul>
 
 
@@ -317,6 +317,24 @@
     <%quiz = question[3]%>
     <%found = @@unlocked_uuid_index[session[:tester]] && @@unlocked_uuid_index[session[:tester]].include?(index_array)%>
     <div class="container my-container">
+      <font color="orange" size="5pt">
+        <span class="glyphicon glyphicon-user"></span>
+        <%if found%>
+           <%=question[2]%>
+        <%else%>
+           <%divID = "authorDiv" + index_array[0].to_s + index_array[1].to_s%>
+           <%btnID = "authorBtn" + index_array[0].to_s + index_array[1].to_s%>
+           <div class="inline_form" id=<%=divID%> >
+                    <button id=<%=btnID%> class="btn btn-warning">Unlock</button>
+           </div>
+           <script type="text/JavaScript">
+                 //<![CDATA[
+                    console.log("here")
+                    new UnlockBtn("<%=divID%>", "<%=btnID%>", "<%=index_array[0].to_s%>", "<%=index_array[1].to_s%>","coinicon", "<%=question[2]%>","<%=session[:tester]%>"); 
+                 //]]>
+           </script>
+        <%end%>
+      </font>
       <!-- question row -->
       <div class="row">
         <div class="col-xs-12 col-sm-8"><center><%=quiz["question"]%></center></div>
