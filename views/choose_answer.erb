@@ -58,6 +58,11 @@
       display: inline-block;
     }
 
+    #messagebtn{
+      background: #f8e4e5;
+      border-width: 0px;
+    }
+
     #red_background{
       background: #f8e4e5;
       border-radius: 5px;
@@ -117,6 +122,10 @@
 
     #bettingleftid{
       display: inline-block;
+    }
+
+    #modalbody{
+      text-align: left;
     }
     </style>
 
@@ -239,13 +248,35 @@
               <center>
                     </form>
               </br>
+                
               <font color="#4169e3" size="3pt">
               Your bet <img src="/img/chip.png" alt="Smiley face" width="22" height="22"> <span id="range">0</span>
+              <button id="messagebtn" class="btn" data-toggle="modal" data-target="#myModal">
+                  <img src="/img/question.png" alt="Smiley face" width="25" height="25">
+              </button>
               <input id="rangeid" type="range" min="0" max="<%=session[:bettingleft]%>" value="0" step="10" onchange="showValue(this.value,<%=session[:bettingleft]%>)" />
             </font>
+            
               
     </div>
   </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        
+        <div id="modalbody">
+        <font size="4pt" color="#767676">Feel free to place your bet on each question!</br></br>
+        You will receive <b>2x</b> of your bet when the next person guesses your answer correctly!</font>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
 function showValue(newValue, bettingleft)

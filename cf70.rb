@@ -274,6 +274,7 @@ route :get, :post, '/home' do
 
   #question, bet(Integer), correctness(BOOL)
   @notifications = @@librarian.get_notification session[:tester]
+  clear_session
   erb :home
 end
 
@@ -546,6 +547,9 @@ route :get, :post, '/view_my_report' do
 
   @my_questions.shuffle!
 
+  if params[:toguess]
+    @toguess = params[:toguess]
+  end
   #-------- Below is about calculating the spider web! --------#
   # @@generated_bundles[name] = [
   #                              [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
@@ -744,7 +748,7 @@ post '/result' do
   elsif @win == 2
     @reward = 40
   else
-    @reward = 50
+    @reward = 60
   end
   @@coins[session[:tester]] += @reward
 

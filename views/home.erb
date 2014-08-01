@@ -16,7 +16,7 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
     <link rel="stylesheet" type="text/css" href="css/homepage.css">
-
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
  
 
     <script type="text/JavaScript">
@@ -94,19 +94,33 @@
       }
 
       #playpanel{
-        background-color: #f8e4e5;
+        background-color: #f6d0d0;
+        background-image:url('/img/play.png');
+        background-size: 123px 100px;
+        background-repeat: no-repeat;
+        background-position:center; 
+        font-family: 'Open Sans', sans-serif;
       }
       #guesspanel{
-        background-color: #cdf8de;  
+        background-color: #9bf1bd;
+        background-image:url('/img/guess.png');
+        background-size: 123px 100px; 
+        background-repeat: no-repeat;
+        background-position:center;  
       }
       #viewpanel{
-        background-color: #caecfa;  
+        background-color: #caecfa; 
+        background-image:url('/img/view.png');
+        background-size: 123px 100px; 
+        background-repeat: no-repeat;
+        background-position:center; 
       }
       #choose-section{
         padding-left: 7px;
         padding-top: 5px;
         min-width: 316px;
       }
+
     </style>
 
   </head>
@@ -156,9 +170,10 @@
           return;
         }
         var coinClicked=function(){
-          alert("Coins is the main currency of this game.\nCoins can be used to buy information, shuffle or bet.");
+          alert("Coin is the main currency of this game.\nCoin can be used to buy information, shuffle or bet.");
           return;
         }
+
         //]]>
     </script>
 
@@ -198,7 +213,7 @@
     </center>
     </div>
     <div id="time_display" class="col-xs-2 col-sm-2" onclick="timeClicked()"><center>
-      <%if @@energy_left[session[:tester]] == 5 %> Full <%end%></div>
+      <%if @@energy_left[session[:tester]] == 5 %> 00:00 <%end%></div>
     </center>
     </div>
   </div>
@@ -246,7 +261,10 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
 
-          <div class="collapsetitle"><center>What do you think about your friends?</center></div>
+          <div class="collapsetitle">
+            <font size="5pt"><center>Play</center></font>
+            <center>What do you think about your friends?</center>
+          </div>
           <div class="collapsesub"><center>Earn  <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 100</center></div>
           <div class="collapsesub"><center>Spend  <img src="/img/energy.png" alt="Smiley face" width="22" height="22">to play</center></div>
 
@@ -269,9 +287,11 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
 
-          <div class="collapsetitle"><center>Guess what others think!</center></div>
+          <div class="collapsetitle">
+            <font size="5pt"><center>Guess</center></font>
+            <center>Guess what others think!</center></div>
           <div class="collapsesub"><center>Spend <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 50 to play</center></div>
-          <div class="collapsesub"><center>Earn up to <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 600</center></div>
+          <div class="collapsesub"><center>Earn up to <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> 300</center></div>
 
         </a>
       </h4>
@@ -297,7 +317,9 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
 
-          <div class="collapsetitle"><center>See what others think about you!</center></div>
+          <div class="collapsetitle">
+            <font size="5pt"><center>View</center></font>
+            <center>See what others think about you!</center></div>
           <div class="collapsesub"><center>Spend  <img src="/img/coin.png" alt="Smiley face" width="22" height="22"> to unlock an author</center></div>
         </a>
       </h4>
@@ -349,6 +371,10 @@
             </div>
           <%end%>
         <%end%>
+
+        <form class="form-horizontal" role="form" action="view_my_report" method="post">
+              <center><button type="submit" class="btn btn-info btn-block" name="toguess" value="true">See who guessed you correctly or wrong</button></center>
+        </form>
         
       </div>
     </div>
@@ -361,7 +387,7 @@
     var msgbtn = document.getElementById("messagebtn");
     msgbtn.style.visibility='hidden';
     if(<%=@notifications.count%> > 0){
-      setTimeout(function(){clickbtn()},500);
+      setTimeout(function(){clickbtn()},0);
     }
     function clickbtn(){
       msgbtn.click()
@@ -409,7 +435,7 @@
            secs_left = secs_left -1;
         }
         if(energy == 5){
-            time_container.innerHTML = "Full";
+            time_container.innerHTML = "00:00";
         }else{
             time_container.innerHTML = get_min_sec(secs_left);
         }
