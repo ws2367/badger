@@ -306,7 +306,7 @@
 
     <div class="col-xs-12 col-sm-12" style="background-color: #66CCFF;">
     </div>
-</br>
+</br></br>
 
 <div class="container-marketing">
 
@@ -337,11 +337,11 @@
       </font>
       <!-- question row -->
       <div class="row">
-        <div class="col-xs-12 col-sm-8"><center><%=quiz["question"]%></center></div>
+        <div class="col-xs-12 col-sm-6"><center><%=quiz["question"]%></center></div>
       </div>
       <!-- answer row -->
       <div class="row">
-        <div class="col-xs-6 col-sm-4"><center>
+        <div class="col-xs-6 col-sm-3"><center>
           <%if quiz["option0"] == quiz["answer"]%>
              <span class="glyphicon glyphicon-ok"></span>
              <font>
@@ -356,7 +356,7 @@
           </font>
           </center>
         </div>
-        <div class="col-xs-6 col-sm-4"><center>
+        <div class="col-xs-6 col-sm-3"><center>
           <%if quiz["option1"] == quiz["answer"]%>
              <span class="glyphicon glyphicon-ok"></span>
              <font>
@@ -405,10 +405,10 @@
         <div class="container my-container">
           
           <div class="row">
-            <div class="col-xs-12 col-sm-8"><center><%=quiz["question"]%></center></div>
+            <div class="col-xs-12 col-sm-6"><center><%=quiz["question"]%></center></div>
           </div>
           <div class="row">
-            <div class="col-xs-6 col-sm-4">
+            <div class="col-xs-6 col-sm-3">
               <center>
               <%if quiz["option0"] == quiz["answer"]%>
                  <span class="glyphicon glyphicon-ok"></span>
@@ -424,7 +424,7 @@
               </font>
               </center>
             </div>
-            <div class="col-xs-6 col-sm-4">
+            <div class="col-xs-6 col-sm-3">
               <center>
               <%if quiz["option1"] == quiz["answer"]%>
                  <span class="glyphicon glyphicon-ok"></span>
@@ -444,7 +444,7 @@
           <!-- unlock buttons row-->
           <div class="row"> 
             <!-- unlock buttons left cell-->
-            <div class="col-xs-6 col-sm-4">
+            <div class="col-xs-6 col-sm-3">
               <center>
                 <%if leftGuesser.count == 0%>
                 <button class="btn btn-warning" disabled="disabled">Unlock</button>
@@ -481,7 +481,7 @@
               </center>
             </div>
             <!-- unlock buttons right cell-->
-            <div class="col-xs-6 col-sm-4">
+            <div class="col-xs-6 col-sm-3">
               <center>
                 <%if rightGuesser.count == 0%>
                   <button class="btn btn-warning" disabled="disabled">Unlock</button>
