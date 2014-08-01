@@ -502,7 +502,7 @@ end
 
 
 def normalize score
-  multiplier = 0.0333333
+  multiplier = 0.10
   Math.atan(multiplier * score.to_f)/(Math::PI) + 0.5
 end
 
@@ -897,7 +897,7 @@ post '/next' do
 end
 
 post "/unlockGuesser" do
-  puts "unlock guesser: " + params[:uuid]
+  # puts "unlock guesser: " + params[:uuid]
   @@coins[session[:tester]] = @@coins[session[:tester]] - 100
   # @@librarian.unlock_guesser(session[:tester], params[:uuid])
   status 200

@@ -180,7 +180,7 @@
   <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist" id="myTab">
   <li class="active"><a href="#spiderweb" role="tab" data-toggle="tab">Profile</a></li>
-  <li><a href="#author" role="tab" data-toggle="tab">Choose you</a></li>
+  <li><a href="#author" role="tab" data-toggle="tab">Chose you</a></li>
   <li><a href="#guesser" role="tab" data-toggle="tab">Get you</a></li>
 </ul>
 
@@ -390,7 +390,6 @@
                  #    "wrong"=> Array.new, 
                  #    "quiz"=> quiz
                  #   }
-      puts "guesser: " + @guesser_questions.inspect
       @guesser_questions.each do |question|%>
         <%quiz  = question["quiz"]%>
         <%if quiz["option0"] == quiz["answer"]
