@@ -10,6 +10,7 @@ require 'json'
 require 'csv'
 require 'uuidtools'
 require 'twilio-ruby'
+require 'time'
 
 require './librarian.rb'
 
@@ -121,7 +122,10 @@ def initialize_record
   @@progress = Hash.new
   @@gems = Hash.new
   @@unlocked_uuid_index = Hash.new
-  @@data_to_w_r = ["categories", "score_buffer","logged_in","view_report","unlock_someone", "play_others","play_answer","view_rankings","use_gems","wins", "losses", "level", "progress", "gems", "unlocked_uuid_index", "coins"]
+  @@data_to_w_r = ["categories", "score_buffer","logged_in","view_report","unlock_someone", 
+                   "play_others","play_answer","view_rankings","use_gems","wins", "losses", 
+                   "level", "progress", "gems", "unlocked_uuid_index", "coins", "record", 
+                   "unlocked"]
   @@wins = Hash.new
   @@losses = Hash.new
 
@@ -587,6 +591,13 @@ route :get, :post, '/view_my_report' do
     end
   end
 
+  # for resuming the server
+  @@score_buffer[@name].each do |key, version|
+    if version["time"].class == String
+      version["time"] = Time.parse(version["time"])
+    end
+  end
+
   @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now,
              "detail" => {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
             }
@@ -619,12 +630,12 @@ route :get, :post, '/view_my_report' do
     end
   end
   
-  puts "score before"
-  puts @scores.inspect
-  @scores = normalize_score @scores
+  # puts "score before"
+  # puts @scores.inspect
+  # @scores = normalize_score @scores
   
-  puts "score after"
-  puts @scores.inspect
+  # puts "score after"
+  # puts @scores.inspect
 
   time_diff_w_old = @scores["time"] - @@score_buffer[@name]["old"]["time"]
   time_diff_w_new = @scores["time"] - @@score_buffer[@name]["new"]["time"]
@@ -948,7 +959,7 @@ post "/shuffle_question" do
       @question = @@questions[prng.rand(@@questions.count)]     
       break if !already_exists(@question, session[:bundle])
   end 
-  puts @question
+  # puts @question
   status 200
   body @question
 end
@@ -956,22 +967,24 @@ end
 
 get "/record_all_data" do
   @@data_to_w_r.each do |name| 
-    File.open(name + ".txt", 'w') do |file|
+    File.open("record/" + name + ".txt", 'w') do |file|
       file.write(eval("@@" + name).to_json)
     end
   end
+  @@librarian.record_all_data
   status 200
   body ''
 end
 
 get "/read_all_data" do
   @@data_to_w_r.each do |name|
-    File.open(name + ".txt", 'r') do |file|
+    File.open("record/" + name + ".txt", 'r') do |file|
       temp = file.read
       code = "@@" + name + "=" + "JSON.parse(temp)"
       eval(code)
     end
   end
+  @@librarian.read_all_data
   status 200
   body ''
 end

@@ -20,6 +20,7 @@
 class Librarian
 
   def initialize all_names
+    @data_to_record = ["notifications", "records", "bundles", "bundles_played"]
     @notifications = Hash.new
     @records = Hash.new
     @bundles = Hash.new
@@ -29,6 +30,24 @@ class Librarian
       initialize_for_a_player name
     end
   end  
+
+  def record_all_data
+    @data_to_record.each do |name| 
+      File.open("record/librarian/" + name + ".txt", 'w') do |file|
+        file.write(eval("@" + name).to_json)
+      end
+    end
+  end
+
+  def read_all_data
+    @data_to_record.each do |name|
+      File.open("record/librarian/" + name + ".txt", 'r') do |file|
+        temp = file.read
+        code = "@" + name + "=" + "JSON.parse(temp)"
+        eval(code)
+      end
+    end
+  end
 
   def initialize_for_a_player name
     # @unlocked_guesser_uuid[name] = Array.new if @unlocked_guesser_uuid[name] == nil
@@ -46,12 +65,12 @@ class Librarian
   def record_win(guesser, bundle, author, win_record)
     
     new_bundle = Array.new(bundle)
-    puts "recordd win: " + new_bundle.inspect
+    # puts "recordd win: " + new_bundle.inspect
     new_bundle.each_with_index do |quiz, index|
       quiz["record"] = win_record[index]
     end
 
-    @records[author] << {guesser: guesser, bundle:new_bundle}
+    @records[author] << {"guesser" => guesser, "bundle"=>new_bundle}
   end
 
   # return notification for tester
@@ -78,7 +97,7 @@ class Librarian
   def get_guesser_questions(tester_name)
     guesser_questions = Hash.new
     @records[tester_name].each do |hash|
-      hash[:bundle].each do |quiz|
+      hash["bundle"].each do |quiz|
         if guesser_questions[quiz["uuid"]] == nil
           guesser_questions[quiz["uuid"]] = {"right"=> Array.new, 
                                              "wrong"=> Array.new, 
@@ -86,9 +105,9 @@ class Librarian
                                              }
         end
         if quiz["record"] == "true"
-          guesser_questions[quiz["uuid"]]["right"] << hash[:guesser]
+          guesser_questions[quiz["uuid"]]["right"] << hash["guesser"]
         else
-          guesser_questions[quiz["uuid"]]["wrong"] << hash[:guesser]
+          guesser_questions[quiz["uuid"]]["wrong"] << hash["guesser"]
         end
       end
     end
