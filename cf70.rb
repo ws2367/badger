@@ -632,7 +632,7 @@ route :get, :post, '/view_my_report' do
   
   # puts "score before"
   # puts @scores.inspect
-  # @scores = normalize_score @scores
+  @scores = normalize_score @scores
   
   # puts "score after"
   # puts @scores.inspect
