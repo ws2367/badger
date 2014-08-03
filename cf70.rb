@@ -546,128 +546,137 @@ def sec_to_units seconds
 end
 
 route :get, :post, '/view_my_report' do
-  @@view_report[session[:tester]] << Time.now
+  begin
+    @@view_report[session[:tester]] << Time.now
 
-  @my_questions = @@librarian.get_questions_of(session[:tester])
+    @my_questions = @@librarian.get_questions_of(session[:tester])
 
-  @my_questions.shuffle!
+    @my_questions.shuffle!
 
-  if params[:toguess]
-    @toguess = params[:toguess]
-  end
-  #-------- Below is about calculating the spider web! --------#
-  # @@generated_bundles[name] = [
-  #                              [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
-  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-  #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
-  #                             ]
+    if params[:toguess]
+      @toguess = params[:toguess]
+    end
+    #-------- Below is about calculating the spider web! --------#
+    # @@generated_bundles[name] = [
+    #                              [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+    #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+    #                                      {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+    #                             ]
 
 
-  # quiz = {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}
-  # 
-  # bundle = [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
-            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-            # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]
-  # 
-  # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
-                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
-                  #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
+    # quiz = {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}
+    # 
+    # bundle = [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+              # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+              # {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]
+    # 
+    # parcel = [uuid, [{qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}, 
+                    #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx},
+                    #  {qustion:xx, option0:xx, option1:xx, answer:xx, time:xx}]]
 
-  @name = session[:tester]
+    @name = session[:tester]
 
-  if @@score_buffer[@name] == nil
-    @@score_buffer[@name] = Hash.new
-    @@score_buffer[@name]["old"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now, 
-                                        "detail"=> {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
-                                       }
-    @@score_buffer[@name]["new"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now, 
-                                        "detail"=> {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
-                                       }
+    if @@score_buffer[@name] == nil
+      @@score_buffer[@name] = Hash.new
+      @@score_buffer[@name]["old"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now, 
+                                          "detail"=> {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
+                                         }
+      @@score_buffer[@name]["new"] = {"S"=>0.5, "P"=>0.5, "R"=>0.5, "time"=>Time.now, 
+                                          "detail"=> {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
+                                         }
+      CATEGORIES.each do |categ, dims|
+        dims.each do |dim|
+          @@score_buffer[@name]["old"]["detail"][categ][dim] = 0.5
+          @@score_buffer[@name]["new"]["detail"][categ][dim] = 0.5
+        end                              
+      end
+    end
+
+    # for resuming the server
+    @@score_buffer[@name].each do |key, version|
+      if version["time"].class == String
+        version["time"] = Time.parse(version["time"])
+      end
+    end
+
+    @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now,
+               "detail" => {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
+              }
+    
+    relevants = @@librarian.get_relevant_quizzes(@name)
+
     CATEGORIES.each do |categ, dims|
       dims.each do |dim|
-        @@score_buffer[@name]["old"]["detail"][categ][dim] = 0.5
-        @@score_buffer[@name]["new"]["detail"][categ][dim] = 0.5
+          @scores["detail"][categ][dim] = 0.0
       end                              
     end
-  end
 
-  # for resuming the server
-  @@score_buffer[@name].each do |key, version|
-    if version["time"].class == String
-      version["time"] = Time.parse(version["time"])
+    relevants.each do |quiz|
+      next if @@categories[quiz["question"]] == nil
+
+      category  = @@categories[quiz["question"]]["categ"]
+      next if category == "F"
+
+      value     = @@categories[quiz["question"]]["value"]
+      dim       = @@categories[quiz["question"]]["dim"]
+      # att       = @@categories[quiz["question"]]["att"]
+
+      another_option = (quiz["option1"] == @name) ? quiz["option0"] : quiz["option1"]
+      if quiz["answer"] == @name      
+        @scores[category] += value
+        @scores["detail"][category][dim] += value  
+
+      elsif quiz["answer"] == another_option
+        @scores[category] -= value
+        @scores["detail"][category][dim] -= value
+        
+      end
     end
-  end
+    
+    # puts "score before"
+    # puts @scores.inspect
+    @scores = normalize_score @scores
+    
+    # puts "score after"
+    # puts @scores.inspect
 
-  @scores = {"S"=>0, "P"=>0, "R"=>0, "time"=>Time.now,
-             "detail" => {"S"=>Hash.new, "P"=>Hash.new, "R"=>Hash.new}
-            }
-  
-  relevants = @@librarian.get_relevant_quizzes(@name)
+    time_diff_w_old = @scores["time"] - @@score_buffer[@name]["old"]["time"]
+    time_diff_w_new = @scores["time"] - @@score_buffer[@name]["new"]["time"]
 
-  CATEGORIES.each do |categ, dims|
-    dims.each do |dim|
-        @scores["detail"][categ][dim] = 0.0
-    end                              
-  end
-
-  relevants.each do |quiz|
-    category  = @@categories[quiz["question"]]["categ"]
-    next if category == "F"
-
-    value     = @@categories[quiz["question"]]["value"]
-    dim       = @@categories[quiz["question"]]["dim"]
-    # att       = @@categories[quiz["question"]]["att"]
-
-    another_option = (quiz["option1"] == @name) ? quiz["option0"] : quiz["option1"]
-    if quiz["answer"] == @name      
-      @scores[category] += value
-      @scores["detail"][category][dim] += value  
-
-    elsif quiz["answer"] == another_option
-      @scores[category] -= value
-      @scores["detail"][category][dim] -= value
-      
-    end
-  end
-  
-  # puts "score before"
-  # puts @scores.inspect
-  @scores = normalize_score @scores
-  
-  # puts "score after"
-  # puts @scores.inspect
-
-  time_diff_w_old = @scores["time"] - @@score_buffer[@name]["old"]["time"]
-  time_diff_w_new = @scores["time"] - @@score_buffer[@name]["new"]["time"]
-
-  # First rule: Never too old
-  if time_diff_w_old > TIME_DIFFERENCE_UPPER_BOUND
-    @@score_buffer[@name]["old"] = @@score_buffer[@name]["new"]
-  # Second rule: Never too new
-  elsif time_diff_w_new < TIME_DIFFERENCE_LOWER_BOUND
-
-  else
-    # Third rule: The one with larger difference stays
-    diff_w_old = (@scores["S"] - @@score_buffer[@name]["old"]["S"]).abs + 
-                 (@scores["P"] - @@score_buffer[@name]["old"]["P"]).abs + 
-                 (@scores["R"] - @@score_buffer[@name]["old"]["R"]).abs
-
-    diff_w_new = (@scores["S"] - @@score_buffer[@name]["new"]["S"]).abs + 
-                 (@scores["P"] - @@score_buffer[@name]["new"]["P"]).abs + 
-                 (@scores["R"] - @@score_buffer[@name]["new"]["R"]).abs
-
-    if diff_w_new > diff_w_old
+    # First rule: Never too old
+    if time_diff_w_old > TIME_DIFFERENCE_UPPER_BOUND
       @@score_buffer[@name]["old"] = @@score_buffer[@name]["new"]
+    # Second rule: Never too new
+    elsif time_diff_w_new < TIME_DIFFERENCE_LOWER_BOUND
+
+    else
+      # Third rule: The one with larger difference stays
+      diff_w_old = (@scores["S"] - @@score_buffer[@name]["old"]["S"]).abs + 
+                   (@scores["P"] - @@score_buffer[@name]["old"]["P"]).abs + 
+                   (@scores["R"] - @@score_buffer[@name]["old"]["R"]).abs
+
+      diff_w_new = (@scores["S"] - @@score_buffer[@name]["new"]["S"]).abs + 
+                   (@scores["P"] - @@score_buffer[@name]["new"]["P"]).abs + 
+                   (@scores["R"] - @@score_buffer[@name]["new"]["R"]).abs
+
+      if diff_w_new > diff_w_old
+        @@score_buffer[@name]["old"] = @@score_buffer[@name]["new"]
+      end
     end
-  end
-  @@score_buffer[@name]["new"] = @scores
+    @@score_buffer[@name]["new"] = @scores
 
-  @time_difference = sec_to_units(@@score_buffer[@name]["new"]["time"] - @@score_buffer[@name]["old"]["time"])
-  
-  @contributors = collect_contributors(@name)
+    @time_difference = sec_to_units(@@score_buffer[@name]["new"]["time"] - @@score_buffer[@name]["old"]["time"])
+    
+    @contributors = collect_contributors(@name)
 
-  @guesser_questions = @@librarian.get_guesser_questions(@name)
-  erb :my_report
+    @guesser_questions = @@librarian.get_guesser_questions(@name)
+    erb :my_report
+
+  rescue
+    @guesser_questions = Array.new
+    @my_questions = Array.new
+    erb :my_report_exception
+  end 
 end
 
 post '/choose_guess_categ' do
