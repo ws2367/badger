@@ -54,12 +54,6 @@ def import_questions
   end
 
   @@questions.shuffle!
-  # @@questions.shuffle!
-  # CSV.open("suffled_questions.csv", "wb") do |csv|
-  #   @@questions.each do |i|
-  #     csv << i
-  #   end
-  # end
 end
 
 # run after import_questions
@@ -202,27 +196,6 @@ configure do
   extract_categ
   
 end
-
-=begin
-def render_lobby
-  if @@last_played[session[:tester]] == nil
-      @secs_to_play = "PLAY GAME! 10 left"
-  else
-      if @@questions_left[session[:tester]] != nil
-         @secs_to_play = "PLAY GAME! "+ @@questions_left[session[:tester]].to_s + " left"
-      else
-         @secs_since = Time.now - @@last_played[session[:tester]]
-         if @secs_since.to_i > GAME_CYCLE
-             @secs_to_play = "PLAY GAME! 10 left"
-         else
-             temp = GAME_CYCLE - @secs_since.to_i
-             @secs_to_play = temp.to_s
-         end
-      end
-  end
-  erb :lobby
-end
-=end
 
 
 def clear_session
@@ -471,8 +444,6 @@ end
 
 post '/choose_ending' do
   @@coins[session[:tester]] = @@coins[session[:tester]] + 100
-
-  # addupXP(100, session[:tester])
 
   erb :choose_ending
 end
