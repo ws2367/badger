@@ -21,10 +21,10 @@ set :port, PORT
 
 enable :sessions
 
-INITIAL_BLOOD = 5
+INITIAL_BLOOD = 8
 PLAY_ADD_BLOOD  = 1
 GUESS_ADD_BLOOD = 1
-GUESS_SUBSTRACT_BLOOD = 3
+GUESS_SUBSTRACT_BLOOD = 7
 
 
 def import_questions
@@ -108,7 +108,7 @@ def add_new_player
   @@names.each do |name|
 
     @@logged_in[name] = Array.new    if @@logged_in[name] == nil
-    @@players[name] = Play.new(name) if @@players[name] == nil
+    @@players[name] = Player.new(name) if @@players[name] == nil
 
     @@librarian.add_player name
   end
