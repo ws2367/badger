@@ -97,7 +97,8 @@ class Librarian
     quiz_uuids = @bundles[bundle_uuid].map{|parcel| parcel[0]}
     # return @quizzes.select{|uuid, quiz| quiz["player"] != player}.values.sample
     return @quizzes.select{|uuid, quiz| 
-      !(quiz_uuids.include? uuid)
+      !(quiz_uuids.include? uuid) and 
+      quiz["player"] != player
       }.values.sample
   end
 
