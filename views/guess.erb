@@ -97,14 +97,22 @@
           <div class="col-xs-12 col-sm-12"><font size="4pt" color="0000CD"><%=@quiz["question"]%></font></div>
         </div><!-- /.row -->
         </br>
+        <%  if @to_switch_side 
+              left_option = @quiz["option1"]
+              right_option = @quiz["option0"]
+            else
+              left_option = @quiz["option0"]
+              right_option = @quiz["option1"]
+            end
+          %>
         <div class="row">
           <form id="nextform" role="form" action="play" method="post">   
             <input type="hidden" name="correctness" value=""> 
             <div class="col-xs-6 col-md-6">
-              <p><button id="option0btn" class="btn btn-info btn-lg btn-block"><%=@quiz["option0"]%></button></p>
+              <p><button id="option0btn" class="btn btn-info btn-lg btn-block"><%=left_option%></button></p>
             </div>
             <div class="col-xs-6 col-md-6">
-              <p><button id="option1btn" class="btn btn-info btn-lg btn-block"><%=@quiz["option1"]%></button></p>
+              <p><button id="option1btn" class="btn btn-info btn-lg btn-block"><%=right_option%></button></p>
             </div>
           </form>
         </div><!-- /.row -->

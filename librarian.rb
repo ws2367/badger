@@ -92,13 +92,15 @@ class Librarian
     return @bundles[uuid].count 
   end
 
-  def get_a_quiz player, bundle_uuid
+  def get_a_quiz player, option, bundle_uuid
     
     quiz_uuids = @bundles[bundle_uuid].map{|parcel| parcel[0]}
     # return @quizzes.select{|uuid, quiz| quiz["player"] != player}.values.sample
     return @quizzes.select{|uuid, quiz| 
       !(quiz_uuids.include? uuid) and 
-      quiz["player"] != player
+      quiz["player"] != player and 
+      
+      (quiz["option0"] == option or quiz["option1"] == option)
       }.values.sample
   end
 
@@ -116,6 +118,6 @@ class Librarian
 
     uuid = UUIDTools::UUID.random_create.to_s
     @guesses[uuid] = guess
-    return uuid
+    return uuid, guess["answer"]
   end
 end
